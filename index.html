@@ -7,6 +7,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
+  .logo-image {
+  width: 50px;
+  height: auto;
+  margin-right: 10px;
+}
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 :root {
   --bg:#0f0f13; --surface:#18181f; --surface2:#1e1e28; --surface3:#25252f;
@@ -60,8 +65,10 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .nav-item-wrap{display:flex;align-items:center;gap:3px;margin-bottom:2px;}
 .nav-item-wrap .nav-item{margin-bottom:0;flex:1;}
 .nav-del-btn{flex-shrink:0;width:24px;height:24px;border-radius:6px;border:none;background:none;color:var(--muted2);font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .15s;padding:0;}
-.nav-item-wrap:hover .nav-del-btn{display:flex;}
+.nav-edit-btn {flex-shrink:0; width:24px; height:24px; border-radius:6px; border:none; background:none; color:var(--muted2); font-size:11px; cursor:pointer; display:none; align-items:center; justify-content:center; transition:all .15s; padding:0;}
+.nav-item-wrap:hover .nav-del-btn, .nav-item-wrap:hover .nav-edit-btn {display:flex;}
 .nav-del-btn:hover{background:rgba(248,113,113,.15);color:var(--danger);}
+.nav-edit-btn:hover {background:rgba(124,107,250,.15); color:var(--accent2);}
 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
@@ -128,6 +135,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .tome-btn{width:44px;height:44px;border-radius:8px;border:2px solid var(--border2);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
 .tome-btn.owned{background:rgba(52,211,153,.15);border-color:#34d399;color:#34d399;}
 .tome-btn.read{background:rgba(124,107,250,.2);border-color:var(--accent2);color:var(--accent2);}
+.tome-btn.both{background:linear-gradient(135deg,rgba(52,211,153,.15) 50%,rgba(124,107,250,.2) 50%);border-color:#34d399;border-right-color:var(--accent2);border-bottom-color:var(--accent2);color:var(--text);}
 .tome-btn:hover{border-color:var(--accent);color:var(--accent2);}
 .tome-legend{display:flex;gap:14px;margin-bottom:8px;flex-wrap:wrap;}
 .tome-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
@@ -234,7 +242,6 @@ select.finput{appearance:none;cursor:pointer;}
   <div class="loading-text">Chargement…</div>
 </div>
 
-<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">📦</div>
@@ -248,13 +255,12 @@ select.finput{appearance:none;cursor:pointer;}
   </div>
 </div>
 
-<!-- APP -->
 <div id="app-screen">
 <div class="app">
   <div class="sidebar">
     <div class="sidebar-logo">
-      <span class="logo-icon">📦</span>
-      <div><div class="logo-text">Collecto</div><div class="logo-sub">Collection</div></div>
+      <img src="images/Fen_treInventaire.webp" alt="Logo Collecto" class="logo-image">
+      <div><div class="logo-text">Mon Inventaire</div><div class="logo-sub">Il y en a du stuff...</div></div>
     </div>
     <div class="user-pill">
       <div class="user-avatar" id="user-avatar">?</div>
@@ -297,7 +303,6 @@ select.finput{appearance:none;cursor:pointer;}
 </div>
 </div>
 
-<!-- ITEM MODAL (manga/livres/jeux/films) -->
 <div class="modal-overlay" id="item-modal">
   <div class="modal">
     <div class="modal-hdr">
@@ -306,7 +311,7 @@ select.finput{appearance:none;cursor:pointer;}
     </div>
     <div class="modal-body">
       <div class="frow">
-        <label class="flabel">Recherche automatique (couverture + tomes)</label>
+        <label class="flabel">Recherche automatique (couverture + infos)</label>
         <input class="finput" id="f-search" placeholder="Tape un titre…" oninput="onSearchInput()" autocomplete="off">
         <div class="search-results" id="search-results"></div>
       </div>
@@ -322,7 +327,7 @@ select.finput{appearance:none;cursor:pointer;}
         <div><label class="flabel" id="status-lbl">Statut</label><select class="finput" id="f-status"></select></div>
       </div>
       <div class="frow" id="tomes-row" style="display:none">
-        <label class="flabel">Nombre de tomes total</label>
+        <label class="flabel" id="f-tomes-lbl">Total</label>
         <input class="finput" id="f-tomes" type="number" min="1" max="9999" placeholder="Ex: 108">
         <div style="font-size:11px;color:var(--muted);margin-top:5px">💡 Rempli automatiquement si trouvé via la recherche</div>
       </div>
@@ -337,7 +342,6 @@ select.finput{appearance:none;cursor:pointer;}
   </div>
 </div>
 
-<!-- SCAN MODAL -->
 <div class="modal-overlay" id="scan-modal">
   <div class="modal">
     <div class="modal-hdr">
@@ -365,7 +369,6 @@ select.finput{appearance:none;cursor:pointer;}
   </div>
 </div>
 
-<!-- CAT MODAL -->
 <div class="modal-overlay" id="cat-modal">
   <div class="modal">
     <div class="modal-hdr"><div class="modal-ttl">Nouvelle catégorie</div><button class="modal-x" onclick="closeCatModal()">✕</button></div>
@@ -373,7 +376,7 @@ select.finput{appearance:none;cursor:pointer;}
       <div class="frow">
         <label class="flabel">Démarrage rapide</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button type="button" onclick="fillPreset('manga')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📚 Mangas / BD</button>
+          <button type="button" onclick="fillPreset('manga')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📚 Mangas</button>
           <button type="button" onclick="fillPreset('book')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📖 Livres</button>
           <button type="button" onclick="fillPreset('scan')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📡 Scan Manga</button>
           <button type="button" onclick="fillPreset('game')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">🎮 Jeux vidéo</button>
@@ -386,8 +389,8 @@ select.finput{appearance:none;cursor:pointer;}
         <div><label class="flabel">Icône (emoji)</label><input class="finput" id="cat-icon" placeholder="🎸" maxlength="2"></div>
         <div><label class="flabel">Type de recherche</label>
           <select class="finput" id="cat-api">
-            <option value="manga">Mangas (grille de tomes)</option>
-            <option value="book">Livres (grille de tomes)</option>
+            <option value="manga">Mangas</option>
+            <option value="book">Livres</option>
             <option value="game">Jeux vidéo</option>
             <option value="tmdb">Films / Séries</option>
             <option value="scan">Scan / Chapitres</option>
@@ -398,13 +401,12 @@ select.finput{appearance:none;cursor:pointer;}
       <div class="frow"><label class="flabel">Label activité</label><input class="finput" id="cat-status" placeholder="Ex: Lu, Joué, Regardé…"></div>
       <div class="frow"><label class="flabel">Label progression</label><input class="finput" id="cat-progress" placeholder="Ex: Tome, Page, Heures…"></div>
     </div>
-    <div class="modal-ftr"><button class="btn-cancel" onclick="closeCatModal()">Annuler</button><button class="btn-save" onclick="saveCat()">Créer</button></div>
+    <div class="modal-ftr"><button class="btn-cancel" onclick="closeCatModal()">Annuler</button><button class="btn-save" onclick="saveCat()">Enregistrer</button></div>
   </div>
 </div>
 
 <div id="toast-container"></div>
 
-<!-- FIRESTORE RULES HELPER -->
 <div id="firestore-helper" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;padding:20px">
   <div style="background:#18181f;border:1px solid rgba(248,113,113,.4);border-radius:14px;max-width:560px;width:100%;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.7)">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
@@ -431,20 +433,6 @@ service cloud.firestore {
 <script>
 // ══════════════════════════════════════════
 //  ⚙️  CONFIG FIREBASE
-//  1. https://console.firebase.google.com
-//  2. Créer projet → appli web → copier firebaseConfig
-//  3. Firestore → créer base → RÈGLES à coller :
-//
-//  rules_version = '2';
-//  service cloud.firestore {
-//    match /databases/{database}/documents {
-//      match /users/{userId}/{document=**} {
-//        allow read, write: if true;
-//      }
-//    }
-//  }
-//
-//  ⚠️  En production, remplacer "if true" par une vraie auth.
 // ══════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBvCTNvHnc5PgbKaQ4W1UiRMUM5j9a5KWU",
@@ -454,9 +442,8 @@ const FIREBASE_CONFIG = {
   appId: "1:324623659789:web:a388237ddadde2b9f77644"
 };
 
-// 🔑 CLÉS API OPTIONNELLES
-const RAWG_KEY = "4500927d4549440b8669e946f994f2ac"; // https://rawg.io/apidocs
-const TMDB_KEY = ""; // https://themoviedb.org/settings/api
+const RAWG_KEY = "4500927d4549440b8669e946f994f2ac"; 
+const TMDB_KEY = "b89d21c912d8c2be86bffad768692cd4"; 
 
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
@@ -464,9 +451,10 @@ const db = firebase.firestore();
 // ── State ──
 let currentUser = null;
 let categories  = [];
-let items       = [];   // items normaux (manga, jeux, livres, films)
-let scanItems   = [];   // suivi scan/chapitres
+let items       = [];   
+let scanItems   = [];   
 let activeCatId = null;
+let editingCatId = null; 
 let activeFilter = 'all';
 let editingItemId = null;
 let editingScanId = null;
@@ -476,8 +464,7 @@ let scanSearchTimer = null;
 let isRegister  = false;
 
 const CAT_SCAN_ID = '__scan__';
-
-const DEFAULT_CATS = []; // Aucune catégorie par défaut — l'utilisateur crée les siennes
+const DEFAULT_CATS = [];
 
 // ══════════════════════════════════════════
 //  AUTH
@@ -575,32 +562,17 @@ async function loadUserData() {
   }
   document.getElementById('loading').style.display='none';
 }
-async function saveItemToDb(item) {
-  await db.collection('users').doc(currentUser.uid).collection('items').doc(item.id).set(item);
-}
-async function deleteItemFromDb(id) {
-  await db.collection('users').doc(currentUser.uid).collection('items').doc(id).delete();
-}
-async function saveScanToDb(s) {
-  await db.collection('users').doc(currentUser.uid).collection('scans').doc(s.id).set(s);
-}
-async function deleteScanFromDb(id) {
-  await db.collection('users').doc(currentUser.uid).collection('scans').doc(id).delete();
-}
-async function saveCatToDb(cat) {
-  await db.collection('users').doc(currentUser.uid).collection('categories').doc(cat.id).set(cat);
-}
-async function deleteCatFromDb(id) {
-  await db.collection('users').doc(currentUser.uid).collection('categories').doc(id).delete();
-}
+async function saveItemToDb(item) { await db.collection('users').doc(currentUser.uid).collection('items').doc(item.id).set(item); }
+async function deleteItemFromDb(id) { await db.collection('users').doc(currentUser.uid).collection('items').doc(id).delete(); }
+async function saveScanToDb(s) { await db.collection('users').doc(currentUser.uid).collection('scans').doc(s.id).set(s); }
+async function deleteScanFromDb(id) { await db.collection('users').doc(currentUser.uid).collection('scans').doc(id).delete(); }
+async function saveCatToDb(cat) { await db.collection('users').doc(currentUser.uid).collection('categories').doc(cat.id).set(cat); }
+async function deleteCatFromDb(id) { await db.collection('users').doc(currentUser.uid).collection('categories').doc(id).delete(); }
 async function deleteCat(catId) {
   const cat = categories.find(c=>c.id===catId); if (!cat) return;
   const count = cat.isScan ? scanItems.length : items.filter(i=>i.catId===catId).length;
-  const msg = count > 0
-    ? `Supprimer "${cat.name}" et ses ${count} item${count>1?'s':''} ? Cette action est irréversible.`
-    : `Supprimer la catégorie "${cat.name}" ?`;
+  const msg = count > 0 ? `Supprimer "${cat.name}" et ses ${count} item${count>1?'s':''} ? Cette action est irréversible.` : `Supprimer la catégorie "${cat.name}" ?`;
   if (!confirm(msg)) return;
-  // Delete all items in this category from Firestore
   if (cat.isScan) {
     for (const s of scanItems) await deleteScanFromDb(s.id).catch(()=>{});
     scanItems = [];
@@ -612,8 +584,7 @@ async function deleteCat(catId) {
   await deleteCatFromDb(catId);
   categories = categories.filter(c=>c.id!==catId);
   if (activeCatId===catId) activeCatId = categories[0]?.id || null;
-  closeDetail();
-  render();
+  closeDetail(); render();
   toast(`"${cat.name}" supprimée`, 'success');
 }
 
@@ -639,24 +610,38 @@ async function searchGame(q) {
 async function searchManga(q) {
   const r=await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(q)}&limit=6`);
   const d=await r.json();
-  return (d.data||[]).map(m=>({
-    title:m.title,
-    cover:m.images?.jpg?.large_image_url||m.images?.jpg?.image_url,
-    meta:m.status||'',
-    volumes: m.volumes || 0,
-    chapters: m.chapters || 0,
-  }));
+  return (d.data||[]).map(m=>({title:m.title,cover:m.images?.jpg?.large_image_url||m.images?.jpg?.image_url,meta:m.status||'',volumes: m.volumes || 0,chapters: m.chapters || 0}));
 }
 async function searchBook(q) {
   const r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=title,author_name,cover_i`);
   const d=await r.json();
   return (d.docs||[]).slice(0,6).map(b=>({title:b.title,cover:b.cover_i?`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`:null,meta:b.author_name?.[0]||'',volumes:0}));
 }
+
 async function searchTMDB(q) {
   if (!TMDB_KEY) return [];
-  const r=await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
-  const d=await r.json();
-  return (d.results||[]).slice(0,6).filter(x=>x.poster_path).map(x=>({title:x.title||x.name,cover:`https://image.tmdb.org/t/p/w300${x.poster_path}`,meta:(x.release_date||x.first_air_date||'').slice(0,4),volumes:0}));
+  const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
+  const d = await r.json();
+  const results = (d.results || []).slice(0,6).filter(x => x.poster_path);
+  const detailedResults = await Promise.all(results.map(async (x) => {
+    let episodes = 0;
+    let seasonText = '';
+    if (x.media_type === 'tv') {
+      try {
+        const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${x.id}?api_key=${TMDB_KEY}&language=fr-FR`);
+        const tvData = await tvRes.json();
+        episodes = tvData.number_of_episodes || 0;
+        seasonText = ` · ${tvData.number_of_seasons} Saison(s)`;
+      } catch(e) { console.error("Erreur TMDB TV:", e); }
+    }
+    return {
+      title: x.title || x.name,
+      cover: `https://image.tmdb.org/t/p/w300${x.poster_path}`,
+      meta: (x.release_date || x.first_air_date || '').slice(0,4) + seasonText,
+      volumes: episodes 
+    };
+  }));
+  return detailedResults;
 }
 
 // ══════════════════════════════════════════
@@ -664,6 +649,13 @@ async function searchTMDB(q) {
 // ══════════════════════════════════════════
 function getActiveCat() { return categories.find(c=>c.id===activeCatId); }
 function isScanMode() { return activeCatId===CAT_SCAN_ID; }
+
+// --- FONCTION UTILITAIRE POUR LES NOMS ---
+function getUnit(api) {
+  if (api === 'tmdb') return { full: 'Épisode', plural: 'Épisodes', short: 'ep.' };
+  if (api === 'book') return { full: 'Volume', plural: 'Volumes', short: 'vol.' };
+  return { full: 'Tome', plural: 'Tomes', short: 't.' };
+}
 
 function renderSidebar() {
   const nav = document.getElementById('sidebar-nav');
@@ -678,6 +670,7 @@ function renderSidebar() {
         <span class="nav-lbl">${cat.name}</span>
         <span class="nav-count">${count}</span>
       </button>
+      <button class="nav-edit-btn" onclick="openCatModal('${cat.id}')" title="Modifier la catégorie">✏️</button>
       <button class="nav-del-btn" onclick="deleteCat('${cat.id}')" title="Supprimer la catégorie">✕</button>`;
     nav.appendChild(wrap);
   });
@@ -725,7 +718,6 @@ function renderMain() {
   if (isScanMode()) { renderScanGrid(); return; }
   const cat = getActiveCat();
   if (!cat) {
-    // No categories yet — show welcome screen
     document.getElementById('stats-row').innerHTML='';
     document.getElementById('items-grid').innerHTML=`
       <div class="empty" style="grid-column:1/-1;padding:80px 20px">
@@ -754,12 +746,15 @@ function renderMain() {
   grid.innerHTML = its.map(item=>{
     const ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Souhait</span>':'<span class="badge b-notowned">Non possédé</span>';
     const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}">${item.status}</span>`:'';
-    // Tome progress badge
     let tomeBadge = '';
+    
+    // Modification: Badge adaptatif avec ep/vol/t.
     if (cat.hasTomes && item.totalTomes>0) {
       const ownedCount = (item.ownedTomes||[]).length;
-      tomeBadge = `<span class="badge b-scan">${ownedCount}/${item.totalTomes} t.</span>`;
+      const unit = getUnit(cat.api);
+      tomeBadge = `<span class="badge b-scan">${ownedCount}/${item.totalTomes} ${unit.short}</span>`;
     }
+    
     const cover = item.image
       ?`<img class="item-cover" src="${item.image}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="item-cover-ph" style="display:none">${cat.icon}</div>`
       :`<div class="item-cover-ph">${cat.icon}</div>`;
@@ -804,9 +799,7 @@ function renderScanGrid() {
         </div>
         <div class="scan-actions" onclick="event.stopPropagation()">
           <button class="scan-btn" onclick="updateScanChapter('${s.id}',-1)" title="−1">−</button>
-          <input class="scan-chap-input" type="number" value="${s.chapter||0}" min="0"
-            onchange="setScanChapterDirect('${s.id}',this.value)"
-            onclick="this.select()">
+          <input class="scan-chap-input" type="number" value="${s.chapter||0}" min="0" onchange="setScanChapterDirect('${s.id}',this.value)" onclick="this.select()">
           <button class="scan-btn" onclick="updateScanChapter('${s.id}',1)" title="+1">+</button>
           <button class="scan-btn" onclick="updateScanChapter('${s.id}',10)" title="+10" style="font-size:11px;width:36px">+10</button>
         </div>
@@ -836,38 +829,45 @@ function selectItem(id) {
     const ownedC = owned.length;
     const readC  = read.length;
     const pct    = Math.round((ownedC/item.totalTomes)*100);
+    const unit   = getUnit(cat.api); // Modification: Titres des bulles adaptatifs
+
     const tomeButtons = Array.from({length:item.totalTomes},(_,i)=>{
       const n=i+1;
       const isOwned = owned.includes(n);
       const isRead  = read.includes(n);
-      const cls = isRead?'read':isOwned?'owned':'';
-      return `<button class="tome-btn ${cls}" onclick="toggleTome('${id}',${n})" title="Tome ${n}">${n}</button>`;
+      let cls = '';
+      if (isOwned && isRead) cls = 'both';
+      else if (isOwned) cls = 'owned';
+      else if (isRead) cls = 'read';
+      return `<button class="tome-btn ${cls}" onclick="toggleTome('${id}',${n})" title="${unit.full} ${n}">${n}</button>`;
     }).join('');
+    
     tomesHTML = `
       <div class="detail-section">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-          <div class="detail-slabel" style="margin-bottom:0">Tomes (${item.totalTomes} au total)</div>
+          <div class="detail-slabel" style="margin-bottom:0">${unit.plural} (${item.totalTomes} au total)</div>
           <div style="display:flex;align-items:center;gap:4px">
             <span style="font-size:11px;color:var(--muted)">Total:</span>
             <input type="number" min="1" max="9999" value="${item.totalTomes}"
               style="width:60px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:3px 6px;color:var(--text);font-size:12px;outline:none;text-align:center"
-              onchange="updateTotalTomes('${id}',this.value)"
-              onclick="this.select()" title="Modifier le nombre total de tomes">
+              onchange="updateTotalTomes('${id}',this.value)" onclick="this.select()" title="Modifier le total">
           </div>
         </div>
         <div class="tome-stats">
           <div class="tome-stat"><div class="tome-stat-val" style="color:var(--success)">${ownedC}</div><div class="tome-stat-lbl">Possédés</div></div>
-          <div class="tome-stat"><div class="tome-stat-val" style="color:var(--accent2)">${readC}</div><div class="tome-stat-lbl">Lus</div></div>
+          <div class="tome-stat"><div class="tome-stat-val" style="color:var(--accent2)">${readC}</div><div class="tome-stat-lbl">${cat.api==='tmdb'?'Vus':'Lus'}</div></div>
           <div class="tome-stat"><div class="tome-stat-val">${item.totalTomes-ownedC}</div><div class="tome-stat-lbl">Manquants</div></div>
         </div>
         <div class="tome-progress-bar"><div class="tome-progress-fill" style="width:${pct}%"></div></div>
+        
         <div class="tome-legend">
           <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(52,211,153,.4);border:2px solid #34d399"></div>Possédé</div>
-          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(124,107,250,.4);border:2px solid var(--accent2)"></div>Lu</div>
-          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:var(--surface3);border:2px solid var(--border2)"></div>Non possédé</div>
+          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(124,107,250,.4);border:2px solid var(--accent2)"></div>${cat.api==='tmdb'?'Vu':'Lu'}</div>
+          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:linear-gradient(135deg,rgba(52,211,153,.4) 50%,rgba(124,107,250,.4) 50%);border:2px solid #34d399;border-bottom-color:var(--accent2);border-right-color:var(--accent2)"></div>Les deux</div>
+          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:var(--surface3);border:2px solid var(--border2)"></div>Aucun</div>
         </div>
         <div class="tome-grid">${tomeButtons}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px">💡 Clic 1 = Possédé · Clic 2 = Lu · Clic 3 = Reset</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">💡 Clic 1 = Possédé · Clic 2 = ${cat.api==='tmdb'?'Vu':'Lu'} · Clic 3 = Les deux · Clic 4 = Reset</div>
       </div>`;
   }
 
@@ -886,21 +886,26 @@ function selectItem(id) {
   renderMain();
 }
 
-// ── TOGGLE TOME (possédé → lu → reset) ──
+// ── TOGGLE TOME (Possédé -> Lu -> Les Deux -> Reset) ──
 async function toggleTome(itemId, tomeNum) {
   const item = items.find(i=>i.id===itemId); if (!item) return;
   const owned = [...(item.ownedTomes||[])];
   const read  = [...(item.readTomes||[])];
   const isOwned = owned.includes(tomeNum);
   const isRead  = read.includes(tomeNum);
+  
   if (!isOwned && !isRead) {
     owned.push(tomeNum); owned.sort((a,b)=>a-b);
   } else if (isOwned && !isRead) {
+    const oi = owned.indexOf(tomeNum); if(oi>=0) owned.splice(oi,1);
     read.push(tomeNum); read.sort((a,b)=>a-b);
+  } else if (!isOwned && isRead) {
+    owned.push(tomeNum); owned.sort((a,b)=>a-b);
   } else {
     const oi = owned.indexOf(tomeNum); if(oi>=0) owned.splice(oi,1);
     const ri = read.indexOf(tomeNum);  if(ri>=0) read.splice(ri,1);
   }
+
   item.ownedTomes = owned;
   item.readTomes  = read;
   await saveItemToDb(item);
@@ -912,7 +917,6 @@ async function updateTotalTomes(itemId, val) {
   const item = items.find(i=>i.id===itemId); if (!item) return;
   const newTotal = Math.max(1, parseInt(val)||1);
   item.totalTomes = newTotal;
-  // Remove owned/read tomes that are now out of range
   item.ownedTomes = (item.ownedTomes||[]).filter(n=>n<=newTotal);
   item.readTomes  = (item.readTomes||[]).filter(n=>n<=newTotal);
   item.updatedAt  = Date.now();
@@ -950,7 +954,6 @@ function selectScan(id) {
   renderScanGrid();
 }
 
-// ── SCAN CHAPTER QUICK UPDATE ──
 async function updateScanChapter(id, delta) {
   const s = scanItems.find(x=>x.id===id); if (!s) return;
   s.chapter = Math.max(0, (s.chapter||0)+delta);
@@ -968,14 +971,9 @@ async function setScanChapterDirect(id, val) {
   if (selectedItemId===id) selectScan(id);
 }
 
-function closeDetail() {
-  selectedItemId=null;
-  document.getElementById('detail-panel').classList.remove('open');
-  renderMain();
-}
+function closeDetail() { selectedItemId=null; document.getElementById('detail-panel').classList.remove('open'); renderMain(); }
 function setFilter(f) { activeFilter=f; render(); }
 function handleAddBtn() { if (isScanMode()) openScanModal(); else openItemModal(); }
-
 function render() { renderSidebar(); renderTopbar(); renderStats(); renderMain(); }
 
 // ══════════════════════════════════════════
@@ -984,6 +982,11 @@ function render() { renderSidebar(); renderTopbar(); renderStats(); renderMain()
 function openItemModal(editId) {
   editingItemId = editId||null;
   const cat = getActiveCat(); if (!cat||cat.isScan) return;
+  
+  // Modification: Rendre le label du formulaire dynamique
+  const unit = getUnit(cat.api);
+  document.getElementById('f-tomes-lbl').textContent = `Total (${unit.plural.toLowerCase()})`;
+
   document.getElementById('modal-ttl').textContent = editId?"Modifier l'item":'Ajouter un item';
   document.getElementById('status-lbl').textContent   = cat.statusLabel;
   document.getElementById('progress-lbl').textContent = cat.progressLabel;
@@ -1075,10 +1078,7 @@ function openScanModal(editId) {
   document.getElementById('scan-search-results').className='search-results';
   document.getElementById('scan-modal').classList.add('open');
 }
-function closeScanModal() {
-  document.getElementById('scan-modal').classList.remove('open');
-  document.getElementById('scan-search-results').className='search-results';
-}
+function closeScanModal() { document.getElementById('scan-modal').classList.remove('open'); document.getElementById('scan-search-results').className='search-results'; }
 async function saveScan() {
   const title = document.getElementById('sf-title').value.trim();
   if (!title) { toast('Le titre est obligatoire','error'); return; }
@@ -1114,7 +1114,6 @@ function updateScanPreview() {
   else prev.innerHTML='<span style="color:var(--muted2);font-size:12px">Aperçu</span>';
 }
 
-// Search dans scan modal
 function onScanSearchInput() {
   clearTimeout(scanSearchTimer);
   const q   = document.getElementById('sf-search').value.trim();
@@ -1139,8 +1138,7 @@ function pickScanResult(i) {
   document.getElementById('sf-title').value = r.title||'';
   if (r.chapters) document.getElementById('sf-total').value = r.chapters;
   if (r.cover) { document.getElementById('sf-image').value=r.cover; updateScanPreview(); }
-  res.className='search-results';
-  document.getElementById('sf-search').value='';
+  res.className='search-results'; document.getElementById('sf-search').value='';
 }
 
 // ══════════════════════════════════════════
@@ -1157,12 +1155,15 @@ function onSearchInput() {
   searchTimer = setTimeout(async()=>{
     const results = await searchCovers(q, cat.api||'none');
     if (!results.length) { res.innerHTML='<div class="searching-msg">Aucun résultat. Colle une URL manuellement.</div>'; return; }
+    
+    // Modification: Résultat de recherche avec texte adaptatif
+    const unit = getUnit(cat.api);
     res.innerHTML = results.map((r,i)=>`
       <div class="search-result-item" onclick="pickResult(${i})">
         ${r.cover?`<img class="sri-cover" src="${r.cover}" onerror="this.style.display='none'">`:(`<div class="sri-cover-ph">${cat.icon}</div>`)}
         <div>
           <div class="sri-title">${esc(r.title)}</div>
-          <div class="sri-meta">${r.volumes?'📚 '+r.volumes+' tomes · ':''} ${esc(r.meta||'')}</div>
+          <div class="sri-meta">${r.volumes?'📚 '+r.volumes+' '+unit.plural.toLowerCase()+' · ':''} ${esc(r.meta||'')}</div>
         </div>
       </div>`).join('');
     res._results = results;
@@ -1175,8 +1176,7 @@ function pickResult(i) {
   document.getElementById('f-title').value = r.title||'';
   if (r.cover) { document.getElementById('f-image').value=r.cover; updateCoverPreview(); }
   if (cat?.hasTomes && r.volumes>0) document.getElementById('f-tomes').value = r.volumes;
-  res.className='search-results';
-  document.getElementById('f-search').value='';
+  res.className='search-results'; document.getElementById('f-search').value='';
 }
 function updateCoverPreview() {
   const url  = document.getElementById('f-image').value;
@@ -1189,7 +1189,7 @@ function updateCoverPreview() {
 //  CATEGORY MODAL
 // ══════════════════════════════════════════
 const PRESETS = {
-  manga: { name:'Mangas / BD',    icon:'📚', api:'manga', status:'Lu',      progress:'Tome / Chapitre' },
+  manga: { name:'Mangas',    icon:'📚', api:'manga', status:'Lu',      progress:'Tome / Chapitre' },
   book:  { name:'Livres',         icon:'📖', api:'book',  status:'Lu',      progress:'Page'            },
   scan:  { name:'Scan Manga',     icon:'📡', api:'scan',  status:'',        progress:'Chapitre'        },
   game:  { name:'Jeux vidéo',     icon:'🎮', api:'game',  status:'Joué',    progress:'Heures de jeu'   },
@@ -1203,11 +1203,34 @@ function fillPreset(type) {
   document.getElementById('cat-status').value   = p.status;
   document.getElementById('cat-progress').value = p.progress;
 }
-function openCatModal()  { document.getElementById('cat-modal').classList.add('open'); }
+
+function openCatModal(editId = null) { 
+  editingCatId = editId; 
+  const modalTtl = document.querySelector('#cat-modal .modal-ttl');
+  if (editId) {
+    modalTtl.textContent = "Modifier la catégorie";
+    const cat = categories.find(c => c.id === editId);
+    if (cat) {
+      document.getElementById('cat-name').value = cat.name;
+      document.getElementById('cat-icon').value = cat.icon;
+      document.getElementById('cat-api').value = cat.api;
+      document.getElementById('cat-status').value = cat.statusLabel;
+      document.getElementById('cat-progress').value = cat.progressLabel;
+    }
+  } else {
+    modalTtl.textContent = "Nouvelle catégorie";
+    ['cat-name','cat-icon','cat-status','cat-progress'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('cat-api').value = 'manga';
+  }
+  document.getElementById('cat-modal').classList.add('open'); 
+}
+
 function closeCatModal() {
   document.getElementById('cat-modal').classList.remove('open');
+  editingCatId = null;
   ['cat-name','cat-icon','cat-status','cat-progress'].forEach(id=>document.getElementById(id).value='');
 }
+
 async function saveCat() {
   const name = document.getElementById('cat-name').value.trim();
   if (!name) { toast('Le nom est obligatoire','error'); return; }
@@ -1216,13 +1239,24 @@ async function saveCat() {
   const progressLabel = document.getElementById('cat-progress').value.trim()||'Progression';
   const api           = document.getElementById('cat-api').value;
   const isScan        = api==='scan';
-  const hasTomes      = !isScan && (api==='manga' || api==='book');
+  const hasTomes      = !isScan && (api==='manga' || api==='book' || api==='tmdb');
   const statuses      = isScan ? [] : [statusLabel,'En cours','Non '+statusLabel.toLowerCase(),'Abandonné'];
-  const cat = { id:'cat_'+Date.now(), name, icon, statusLabel, progressLabel, api, hasTomes, isScan, statuses, order:categories.length, _custom:true };
-  categories.push(cat); activeCatId=cat.id;
-  await saveCatToDb(cat);
+  
+  if (editingCatId) {
+    const cat = categories.find(c => c.id === editingCatId);
+    if (cat) {
+      cat.name = name; cat.icon = icon; cat.statusLabel = statusLabel; cat.progressLabel = progressLabel;
+      cat.api = api; cat.hasTomes = hasTomes; cat.isScan = isScan; cat.statuses = statuses;
+      await saveCatToDb(cat);
+      toast('Catégorie modifiée ✓','success');
+    }
+  } else {
+    const cat = { id:'cat_'+Date.now(), name, icon, statusLabel, progressLabel, api, hasTomes, isScan, statuses, order:categories.length, _custom:true };
+    categories.push(cat); activeCatId=cat.id;
+    await saveCatToDb(cat);
+    toast('Catégorie créée ✓','success');
+  }
   closeCatModal(); render();
-  toast('Catégorie créée ✓','success');
 }
 
 // ══════════════════════════════════════════
@@ -1239,9 +1273,7 @@ function toast(msg,type='success') {
 document.getElementById('item-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeItemModal();});
 document.getElementById('cat-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCatModal();});
 document.getElementById('scan-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeScanModal();});
-document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&document.getElementById('auth-screen').style.display!=='none') handleAuth();
-});
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.getElementById('auth-screen').style.display!=='none') handleAuth(); });
 
 init();
 </script>
