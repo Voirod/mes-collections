@@ -380,7 +380,8 @@ select.finput{appearance:none;cursor:pointer;}
           <button type="button" onclick="fillPreset('book')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📖 Livres</button>
           <button type="button" onclick="fillPreset('scan')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📡 Scan Manga</button>
           <button type="button" onclick="fillPreset('game')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">🎮 Jeux vidéo</button>
-          <button type="button" onclick="fillPreset('film')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">🎬 Films / Séries</button>
+          <button type="button" onclick="fillPreset('movie')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">🎬 Films</button>
+          <button type="button" onclick="fillPreset('tv')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📺 Séries</button>
         </div>
         <div style="font-size:11px;color:var(--muted2);margin-top:6px">Clique pour pré-remplir, ou configure manuellement ci-dessous.</div>
       </div>
@@ -392,7 +393,8 @@ select.finput{appearance:none;cursor:pointer;}
             <option value="manga">Mangas</option>
             <option value="book">Livres</option>
             <option value="game">Jeux vidéo</option>
-            <option value="tmdb">Films / Séries</option>
+            <option value="tmdb_movie">Films</option>
+            <option value="tmdb_tv">Séries</option>
             <option value="scan">Scan / Chapitres</option>
             <option value="none">Aucune</option>
           </select>
@@ -589,7 +591,7 @@ async function deleteCat(catId) {
 }
 
 // ══════════════════════════════════════════
-//  COVER SEARCH
+//  COVER SEARCH & API
 // ══════════════════════════════════════════
 async function searchCovers(q, api) {
   if (!q||q.length<2) return [];
@@ -597,52 +599,68 @@ async function searchCovers(q, api) {
     if (api==='game')  return await searchGame(q);
     if (api==='manga') return await searchManga(q);
     if (api==='book')  return await searchBook(q);
-    if (api==='tmdb')  return await searchTMDB(q);
+    if (api==='tmdb_movie') return await searchTMDBMovie(q);
+    if (api==='tmdb_tv' || api==='tmdb') return await searchTMDBTv(q);
   } catch(e) { console.warn(e); }
   return [];
 }
+
 async function searchGame(q) {
   if (!RAWG_KEY) return [];
   const r=await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(q)}&page_size=6`);
   const d=await r.json();
   return (d.results||[]).map(g=>({title:g.name,cover:g.background_image,meta:g.released?.slice(0,4)||'',volumes:0}));
 }
+
 async function searchManga(q) {
   const r=await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(q)}&limit=6`);
   const d=await r.json();
   return (d.data||[]).map(m=>({title:m.title,cover:m.images?.jpg?.large_image_url||m.images?.jpg?.image_url,meta:m.status||'',volumes: m.volumes || 0,chapters: m.chapters || 0}));
 }
+
 async function searchBook(q) {
   const r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=title,author_name,cover_i`);
   const d=await r.json();
   return (d.docs||[]).slice(0,6).map(b=>({title:b.title,cover:b.cover_i?`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`:null,meta:b.author_name?.[0]||'',volumes:0}));
 }
 
-async function searchTMDB(q) {
+async function searchTMDBMovie(q) {
   if (!TMDB_KEY) return [];
-  const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
+  const r = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
+  const d = await r.json();
+  return (d.results || []).slice(0,6).filter(x => x.poster_path).map(x => ({
+    title: x.title,
+    cover: `https://image.tmdb.org/t/p/w300${x.poster_path}`,
+    meta: (x.release_date || '').slice(0,4),
+    volumes: 0 // Pas d'épisodes pour un film
+  }));
+}
+
+async function searchTMDBTv(q) {
+  if (!TMDB_KEY) return [];
+  const r = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
   const d = await r.json();
   const results = (d.results || []).slice(0,6).filter(x => x.poster_path);
-  const detailedResults = await Promise.all(results.map(async (x) => {
+  
+  return await Promise.all(results.map(async (x) => {
     let episodes = 0;
     let seasonText = '';
-    if (x.media_type === 'tv') {
-      try {
-        const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${x.id}?api_key=${TMDB_KEY}&language=fr-FR`);
-        const tvData = await tvRes.json();
-        episodes = tvData.number_of_episodes || 0;
-        seasonText = ` · ${tvData.number_of_seasons} Saison(s)`;
-      } catch(e) { console.error("Erreur TMDB TV:", e); }
-    }
+    try {
+      const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${x.id}?api_key=${TMDB_KEY}&language=fr-FR`);
+      const tvData = await tvRes.json();
+      episodes = tvData.number_of_episodes || 0;
+      seasonText = ` · ${tvData.number_of_seasons} Saison(s)`;
+    } catch(e) { console.error("Erreur TMDB TV:", e); }
+    
     return {
-      title: x.title || x.name,
+      title: x.name,
       cover: `https://image.tmdb.org/t/p/w300${x.poster_path}`,
-      meta: (x.release_date || x.first_air_date || '').slice(0,4) + seasonText,
+      meta: (x.first_air_date || '').slice(0,4) + seasonText,
       volumes: episodes 
     };
   }));
-  return detailedResults;
 }
+
 
 // ══════════════════════════════════════════
 //  RENDER
@@ -652,7 +670,7 @@ function isScanMode() { return activeCatId===CAT_SCAN_ID; }
 
 // --- FONCTION UTILITAIRE POUR LES NOMS ---
 function getUnit(api) {
-  if (api === 'tmdb') return { full: 'Épisode', plural: 'Épisodes', short: 'ep.' };
+  if (api === 'tmdb_tv' || api === 'tmdb') return { full: 'Épisode', plural: 'Épisodes', short: 'ep.' };
   if (api === 'book') return { full: 'Volume', plural: 'Volumes', short: 'vol.' };
   return { full: 'Tome', plural: 'Tomes', short: 't.' };
 }
@@ -748,7 +766,6 @@ function renderMain() {
     const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}">${item.status}</span>`:'';
     let tomeBadge = '';
     
-    // Modification: Badge adaptatif avec ep/vol/t.
     if (cat.hasTomes && item.totalTomes>0) {
       const ownedCount = (item.ownedTomes||[]).length;
       const unit = getUnit(cat.api);
@@ -829,7 +846,7 @@ function selectItem(id) {
     const ownedC = owned.length;
     const readC  = read.length;
     const pct    = Math.round((ownedC/item.totalTomes)*100);
-    const unit   = getUnit(cat.api); // Modification: Titres des bulles adaptatifs
+    const unit   = getUnit(cat.api);
 
     const tomeButtons = Array.from({length:item.totalTomes},(_,i)=>{
       const n=i+1;
@@ -855,19 +872,19 @@ function selectItem(id) {
         </div>
         <div class="tome-stats">
           <div class="tome-stat"><div class="tome-stat-val" style="color:var(--success)">${ownedC}</div><div class="tome-stat-lbl">Possédés</div></div>
-          <div class="tome-stat"><div class="tome-stat-val" style="color:var(--accent2)">${readC}</div><div class="tome-stat-lbl">${cat.api==='tmdb'?'Vus':'Lus'}</div></div>
+          <div class="tome-stat"><div class="tome-stat-val" style="color:var(--accent2)">${readC}</div><div class="tome-stat-lbl">${(cat.api==='tmdb_tv'||cat.api==='tmdb')?'Vus':'Lus'}</div></div>
           <div class="tome-stat"><div class="tome-stat-val">${item.totalTomes-ownedC}</div><div class="tome-stat-lbl">Manquants</div></div>
         </div>
         <div class="tome-progress-bar"><div class="tome-progress-fill" style="width:${pct}%"></div></div>
         
         <div class="tome-legend">
           <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(52,211,153,.4);border:2px solid #34d399"></div>Possédé</div>
-          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(124,107,250,.4);border:2px solid var(--accent2)"></div>${cat.api==='tmdb'?'Vu':'Lu'}</div>
+          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(124,107,250,.4);border:2px solid var(--accent2)"></div>${(cat.api==='tmdb_tv'||cat.api==='tmdb')?'Vu':'Lu'}</div>
           <div class="tome-legend-item"><div class="tome-legend-dot" style="background:linear-gradient(135deg,rgba(52,211,153,.4) 50%,rgba(124,107,250,.4) 50%);border:2px solid #34d399;border-bottom-color:var(--accent2);border-right-color:var(--accent2)"></div>Les deux</div>
           <div class="tome-legend-item"><div class="tome-legend-dot" style="background:var(--surface3);border:2px solid var(--border2)"></div>Aucun</div>
         </div>
         <div class="tome-grid">${tomeButtons}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px">💡 Clic 1 = Possédé · Clic 2 = ${cat.api==='tmdb'?'Vu':'Lu'} · Clic 3 = Les deux · Clic 4 = Reset</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">💡 Clic 1 = Possédé · Clic 2 = ${(cat.api==='tmdb_tv'||cat.api==='tmdb')?'Vu':'Lu'} · Clic 3 = Les deux · Clic 4 = Reset</div>
       </div>`;
   }
 
@@ -983,7 +1000,6 @@ function openItemModal(editId) {
   editingItemId = editId||null;
   const cat = getActiveCat(); if (!cat||cat.isScan) return;
   
-  // Modification: Rendre le label du formulaire dynamique
   const unit = getUnit(cat.api);
   document.getElementById('f-tomes-lbl').textContent = `Total (${unit.plural.toLowerCase()})`;
 
@@ -1156,7 +1172,6 @@ function onSearchInput() {
     const results = await searchCovers(q, cat.api||'none');
     if (!results.length) { res.innerHTML='<div class="searching-msg">Aucun résultat. Colle une URL manuellement.</div>'; return; }
     
-    // Modification: Résultat de recherche avec texte adaptatif
     const unit = getUnit(cat.api);
     res.innerHTML = results.map((r,i)=>`
       <div class="search-result-item" onclick="pickResult(${i})">
@@ -1189,11 +1204,12 @@ function updateCoverPreview() {
 //  CATEGORY MODAL
 // ══════════════════════════════════════════
 const PRESETS = {
-  manga: { name:'Mangas',    icon:'📚', api:'manga', status:'Lu',      progress:'Tome / Chapitre' },
-  book:  { name:'Livres',         icon:'📖', api:'book',  status:'Lu',      progress:'Page'            },
-  scan:  { name:'Scan Manga',     icon:'📡', api:'scan',  status:'',        progress:'Chapitre'        },
-  game:  { name:'Jeux vidéo',     icon:'🎮', api:'game',  status:'Joué',    progress:'Heures de jeu'   },
-  film:  { name:'Films / Séries', icon:'🎬', api:'tmdb',  status:'Regardé', progress:'Saison/Épisode'  },
+  manga: { name:'Mangas',    icon:'📚', api:'manga',      status:'Lu',       progress:'Tome / Chapitre' },
+  book:  { name:'Livres',    icon:'📖', api:'book',       status:'Lu',       progress:'Page'            },
+  scan:  { name:'Scan Manga',icon:'📡', api:'scan',       status:'',         progress:'Chapitre'        },
+  game:  { name:'Jeux vidéo',icon:'🎮', api:'game',       status:'Joué',     progress:'Heures de jeu'   },
+  movie: { name:'Films',     icon:'🎬', api:'tmdb_movie', status:'Regardé',  progress:'Temps (min)'     },
+  tv:    { name:'Séries',    icon:'📺', api:'tmdb_tv',    status:'Regardé',  progress:'Saison/Épisode'  },
 };
 function fillPreset(type) {
   const p = PRESETS[type]; if (!p) return;
@@ -1239,7 +1255,7 @@ async function saveCat() {
   const progressLabel = document.getElementById('cat-progress').value.trim()||'Progression';
   const api           = document.getElementById('cat-api').value;
   const isScan        = api==='scan';
-  const hasTomes      = !isScan && (api==='manga' || api==='book' || api==='tmdb');
+  const hasTomes      = !isScan && (api==='manga' || api==='book' || api==='tmdb_tv' || api==='tmdb');
   const statuses      = isScan ? [] : [statusLabel,'En cours','Non '+statusLabel.toLowerCase(),'Abandonné'];
   
   if (editingCatId) {
