@@ -7,195 +7,219 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0f0f13; --surface: #18181f; --surface2: #1e1e28; --surface3: #25252f;
-    --accent: #7c6bfa; --accent2: #a78bfa; --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14); --text: #e8e6f0; --muted: #8b8a9e;
-    --muted2: #5e5d70; --success: #34d399; --warning: #fbbf24;
-    --danger: #f87171; --radius: 10px; --radius-lg: 14px;
-  }
-  html, body { height: 100%; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+:root {
+  --bg:#0f0f13; --surface:#18181f; --surface2:#1e1e28; --surface3:#25252f;
+  --accent:#7c6bfa; --accent2:#a78bfa; --border:rgba(255,255,255,0.08);
+  --border2:rgba(255,255,255,0.14); --text:#e8e6f0; --muted:#8b8a9e;
+  --muted2:#5e5d70; --success:#34d399; --warning:#fbbf24;
+  --danger:#f87171; --radius:10px; --radius-lg:14px;
+}
+html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
 
-  /* AUTH */
-  #auth-screen { display:flex; align-items:center; justify-content:center; height:100vh; }
-  .auth-card {
-    background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius-lg);
-    padding:40px 36px; width:360px; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,0.5);
-  }
-  .auth-logo { font-size:40px; margin-bottom:10px; }
-  .auth-title { font-size:22px; font-weight:700; margin-bottom:6px; }
-  .auth-sub { font-size:13px; color:var(--muted); margin-bottom:26px; line-height:1.5; }
-  .auth-input {
-    width:100%; background:var(--surface2); border:1px solid var(--border2);
-    border-radius:8px; padding:10px 14px; color:var(--text); font-size:14px;
-    outline:none; margin-bottom:10px; transition:border-color 0.15s; display:block;
-  }
-  .auth-input:focus { border-color:var(--accent); }
-  .auth-input::placeholder { color:var(--muted2); }
-  .btn-primary {
-    width:100%; padding:11px; border-radius:8px; background:var(--accent); color:#fff;
-    font-size:14px; font-weight:600; border:none; cursor:pointer; transition:all 0.15s; margin-bottom:10px;
-  }
-  .btn-primary:hover { background:var(--accent2); }
-  .auth-toggle { font-size:12px; color:var(--muted); margin-top:14px; }
-  .auth-toggle a { color:var(--accent2); cursor:pointer; }
-  .auth-toggle a:hover { text-decoration:underline; }
-  .auth-error { font-size:12px; color:var(--danger); margin-top:6px; min-height:18px; }
+/* AUTH */
+#auth-screen{display:flex;align-items:center;justify-content:center;height:100vh;}
+.auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:40px 36px;width:360px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.auth-logo{font-size:40px;margin-bottom:10px;}
+.auth-title{font-size:22px;font-weight:700;margin-bottom:6px;}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:26px;line-height:1.5;}
+.auth-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;outline:none;margin-bottom:10px;transition:border-color .15s;display:block;}
+.auth-input:focus{border-color:var(--accent);}
+.auth-input::placeholder{color:var(--muted2);}
+.btn-primary{width:100%;padding:11px;border-radius:8px;background:var(--accent);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .15s;margin-bottom:10px;}
+.btn-primary:hover{background:var(--accent2);}
+.auth-toggle{font-size:12px;color:var(--muted);margin-top:14px;}
+.auth-toggle a{color:var(--accent2);cursor:pointer;}
+.auth-error{font-size:12px;color:var(--danger);margin-top:6px;min-height:18px;}
 
-  /* APP */
-  #app-screen { display:none; height:100vh; }
-  .app { display:flex; height:100%; overflow:hidden; }
+/* APP */
+#app-screen{display:none;height:100vh;}
+.app{display:flex;height:100%;overflow:hidden;}
 
-  /* SIDEBAR */
-  .sidebar { width:230px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
-  .sidebar-logo { padding:18px 16px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
-  .logo-icon { font-size:22px; }
-  .logo-text { font-size:16px; font-weight:700; }
-  .logo-sub { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-top:1px; }
-  .user-pill { margin:10px 10px 0; padding:8px 10px; border-radius:8px; background:var(--surface2); display:flex; align-items:center; gap:8px; border:1px solid var(--border); }
-  .user-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; color:#fff; }
-  .user-name { font-size:12px; font-weight:500; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .user-logout { font-size:13px; color:var(--muted); cursor:pointer; padding:2px 4px; border-radius:4px; flex-shrink:0; }
-  .user-logout:hover { color:var(--danger); }
-  .sidebar-nav { flex:1; padding:12px 8px; overflow-y:auto; }
-  .nav-label { font-size:10px; font-weight:600; color:var(--muted2); text-transform:uppercase; letter-spacing:1px; padding:8px 8px 4px; }
-  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer; font-size:13.5px; color:var(--muted); margin-bottom:2px; transition:all 0.15s; border:none; background:none; width:100%; text-align:left; }
-  .nav-item:hover { background:var(--surface2); color:var(--text); }
-  .nav-item.active { background:rgba(124,107,250,0.15); color:var(--accent2); }
-  .nav-icon { font-size:16px; flex-shrink:0; width:20px; text-align:center; }
-  .nav-count { margin-left:auto; font-size:11px; background:var(--surface3); color:var(--muted); padding:1px 7px; border-radius:20px; }
-  .sidebar-footer { padding:10px 8px; border-top:1px solid var(--border); }
-  .add-cat-btn { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13px; color:var(--muted); background:none; border:1px dashed var(--border2); width:100%; transition:all 0.15s; }
-  .add-cat-btn:hover { color:var(--accent2); border-color:var(--accent); }
+/* SIDEBAR */
+.sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.logo-icon{font-size:22px;}
+.logo-text{font-size:16px;font-weight:700;}
+.logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:1px;}
+.user-pill{margin:10px 10px 0;padding:8px 10px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;gap:8px;border:1px solid var(--border);}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff;}
+.user-name{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.user-logout{font-size:13px;color:var(--muted);cursor:pointer;padding:2px 4px;border-radius:4px;flex-shrink:0;}
+.user-logout:hover{color:var(--danger);}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto;}
+.nav-label{font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;padding:8px 8px 4px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;color:var(--muted);margin-bottom:2px;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:rgba(124,107,250,.15);color:var(--accent2);}
+.nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center;}
+.nav-count{margin-left:auto;font-size:11px;background:var(--surface3);color:var(--muted);padding:1px 7px;border-radius:20px;}
+.sidebar-footer{padding:10px 8px;border-top:1px solid var(--border);}
+.add-cat-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);background:none;border:1px dashed var(--border2);width:100%;transition:all .15s;}
+.add-cat-btn:hover{color:var(--accent2);border-color:var(--accent);}
 
-  /* MAIN */
-  .main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
-  .topbar { padding:14px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; background:var(--bg); flex-wrap:wrap; }
-  .topbar-info { flex:1; min-width:120px; }
-  .topbar-title { font-size:18px; font-weight:700; }
-  .topbar-sub { font-size:12px; color:var(--muted); margin-top:1px; }
-  .search-box { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:7px 12px; }
-  .search-box input { background:none; border:none; outline:none; color:var(--text); font-size:13px; width:160px; }
-  .search-box input::placeholder { color:var(--muted2); }
-  .filter-tabs { display:flex; gap:4px; flex-wrap:wrap; }
-  .ftab { padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer; border:none; background:var(--surface); color:var(--muted); transition:all 0.15s; }
-  .ftab.active { background:rgba(124,107,250,0.2); color:var(--accent2); }
-  .ftab:hover:not(.active) { background:var(--surface2); color:var(--text); }
-  .add-btn { display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:8px; background:var(--accent); color:#fff; font-size:13px; font-weight:600; border:none; cursor:pointer; transition:all 0.15s; flex-shrink:0; }
-  .add-btn:hover { background:var(--accent2); transform:translateY(-1px); }
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg);flex-wrap:wrap;}
+.topbar-info{flex:1;min-width:120px;}
+.topbar-title{font-size:18px;font-weight:700;}
+.topbar-sub{font-size:12px;color:var(--muted);margin-top:1px;}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px;}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:160px;}
+.search-box input::placeholder{color:var(--muted2);}
+.filter-tabs{display:flex;gap:4px;flex-wrap:wrap;}
+.ftab{padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;border:none;background:var(--surface);color:var(--muted);transition:all .15s;}
+.ftab.active{background:rgba(124,107,250,.2);color:var(--accent2);}
+.ftab:hover:not(.active){background:var(--surface2);color:var(--text);}
+.add-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.add-btn:hover{background:var(--accent2);transform:translateY(-1px);}
+.content{flex:1;overflow-y:auto;padding:18px 22px;}
+.stats-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;flex:1;min-width:80px;}
+.stat-val{font-size:22px;font-weight:700;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.stat-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px;}
 
-  .content { flex:1; overflow-y:auto; padding:18px 22px; }
-  .stats-row { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
-  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; flex:1; min-width:80px; }
-  .stat-val { font-size:22px; font-weight:700; }
-  .stat-lbl { font-size:11px; color:var(--muted); margin-top:2px; }
-  .stat-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:4px; }
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px;}
+.item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all .2s;}
+.item-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35);}
+.item-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+.item-cover{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:var(--surface2);}
+.item-cover-ph{width:100%;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:var(--surface2);font-size:48px;color:var(--muted2);}
+.item-body{padding:10px 11px 12px;}
+.item-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-meta{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.b-owned{background:rgba(52,211,153,.12);color:#34d399;}
+.b-notowned{background:rgba(248,113,113,.1);color:#f87171;}
+.b-wish{background:rgba(251,191,36,.1);color:#fbbf24;}
+.b-done{background:rgba(124,107,250,.15);color:#a78bfa;}
+.b-prog{background:rgba(251,191,36,.1);color:#fbbf24;}
+.b-not{background:rgba(255,255,255,.06);color:var(--muted);}
+.b-scan{background:rgba(96,165,250,.12);color:#60a5fa;}
 
-  /* GRID */
-  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:14px; }
-  .item-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; cursor:pointer; transition:all 0.2s; }
-  .item-card:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,0.35); }
-  .item-card.selected { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
-  .item-cover { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--surface2); }
-  .item-cover-ph { width:100%; aspect-ratio:2/3; display:flex; align-items:center; justify-content:center; background:var(--surface2); font-size:48px; color:var(--muted2); }
-  .item-body { padding:10px 11px 12px; }
-  .item-title { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .item-meta { font-size:11px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .item-badges { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
-  .badge { font-size:10px; padding:2px 7px; border-radius:20px; font-weight:500; }
-  .b-owned { background:rgba(52,211,153,0.12); color:#34d399; }
-  .b-notowned { background:rgba(248,113,113,0.1); color:#f87171; }
-  .b-wish { background:rgba(251,191,36,0.1); color:#fbbf24; }
-  .b-done { background:rgba(124,107,250,0.15); color:#a78bfa; }
-  .b-prog { background:rgba(251,191,36,0.1); color:#fbbf24; }
-  .b-not { background:rgba(255,255,255,0.06); color:var(--muted); }
+/* SCAN GRID */
+.scan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.scan-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all .2s;display:flex;}
+.scan-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.3);}
+.scan-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+.scan-cover{width:70px;height:100px;object-fit:cover;flex-shrink:0;background:var(--surface2);}
+.scan-cover-ph{width:70px;height:100px;flex-shrink:0;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--muted2);}
+.scan-body{padding:12px 14px;flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+.scan-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.scan-chap{font-size:22px;font-weight:800;color:var(--accent2);line-height:1;}
+.scan-chap-label{font-size:11px;color:var(--muted);margin-top:2px;}
+.scan-total{font-size:11px;color:var(--muted2);margin-top:6px;}
+.scan-actions{display:flex;gap:6px;margin-top:10px;align-items:center;}
+.scan-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.scan-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
+.scan-chap-input{width:60px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:13px;font-weight:600;outline:none;text-align:center;}
+.scan-chap-input:focus{border-color:var(--accent);}
 
-  /* DETAIL */
-  .detail-panel { width:340px; background:var(--surface); border-left:1px solid var(--border); display:none; flex-direction:column; flex-shrink:0; overflow:hidden; }
-  .detail-panel.open { display:flex; }
-  .detail-cover-wrap { position:relative; }
-  .detail-cover { width:100%; height:200px; object-fit:cover; display:block; background:var(--surface2); }
-  .detail-cover-ph { width:100%; height:200px; display:flex; align-items:center; justify-content:center; background:var(--surface2); font-size:64px; }
-  .detail-close { position:absolute; top:10px; right:10px; width:30px; height:30px; background:rgba(0,0,0,0.6); border:none; color:#fff; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; }
-  .detail-body { padding:18px 18px 0; flex:1; overflow-y:auto; }
-  .detail-title { font-size:17px; font-weight:700; line-height:1.3; margin-bottom:4px; }
-  .detail-cat { font-size:12px; color:var(--muted); margin-bottom:14px; }
-  .detail-section { margin-bottom:14px; }
-  .detail-slabel { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--muted2); font-weight:600; margin-bottom:6px; }
-  .detail-desc { font-size:13px; color:var(--muted); line-height:1.65; }
-  .detail-progress { font-size:15px; color:var(--warning); font-weight:600; }
-  .detail-actions { padding:14px 18px 16px; border-top:1px solid var(--border); display:flex; gap:8px; }
-  .dbtn { flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; text-align:center; border:none; }
-  .dbtn-edit { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
-  .dbtn-edit:hover { border-color:var(--accent); color:var(--accent2); }
-  .dbtn-del { background:rgba(248,113,113,0.08); color:var(--danger); border:1px solid rgba(248,113,113,0.2); }
-  .dbtn-del:hover { background:rgba(248,113,113,0.15); }
+/* TOME GRID (dans detail panel manga) */
+.tome-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-top:8px;}
+.tome-btn{width:44px;height:44px;border-radius:8px;border:2px solid var(--border2);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+.tome-btn.owned{background:rgba(52,211,153,.15);border-color:#34d399;color:#34d399;}
+.tome-btn.read{background:rgba(124,107,250,.2);border-color:var(--accent2);color:var(--accent2);}
+.tome-btn:hover{border-color:var(--accent);color:var(--accent2);}
+.tome-legend{display:flex;gap:14px;margin-bottom:8px;flex-wrap:wrap;}
+.tome-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+.tome-legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.tome-progress-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin:8px 0;}
+.tome-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s;}
+.tome-stats{display:flex;gap:10px;margin-bottom:12px;}
+.tome-stat{flex:1;background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center;}
+.tome-stat-val{font-size:17px;font-weight:700;}
+.tome-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
 
-  .empty { grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--muted); }
-  .empty .eicon { font-size:52px; margin-bottom:14px; }
-  .empty h3 { font-size:15px; color:var(--text); margin-bottom:6px; }
+/* DETAIL PANEL */
+.detail-panel{width:360px;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.detail-panel.open{display:flex;}
+.detail-cover-wrap{position:relative;}
+.detail-cover{width:100%;height:200px;object-fit:cover;display:block;background:var(--surface2);}
+.detail-cover-ph{width:100%;height:200px;display:flex;align-items:center;justify-content:center;background:var(--surface2);font-size:64px;}
+.detail-close{position:absolute;top:10px;right:10px;width:30px;height:30px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.detail-body{padding:16px 16px 0;flex:1;overflow-y:auto;}
+.detail-title{font-size:17px;font-weight:700;line-height:1.3;margin-bottom:4px;}
+.detail-cat{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.detail-section{margin-bottom:14px;}
+.detail-slabel{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);font-weight:600;margin-bottom:6px;}
+.detail-desc{font-size:13px;color:var(--muted);line-height:1.65;}
+.detail-progress{font-size:15px;color:var(--warning);font-weight:600;}
+.detail-actions{padding:12px 16px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+.dbtn{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;text-align:center;border:none;}
+.dbtn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.dbtn-edit:hover{border-color:var(--accent);color:var(--accent2);}
+.dbtn-del{background:rgba(248,113,113,.08);color:var(--danger);border:1px solid rgba(248,113,113,.2);}
+.dbtn-del:hover{background:rgba(248,113,113,.15);}
 
-  /* LOADING */
-  .loading-overlay { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:200; flex-direction:column; gap:14px; }
-  .spinner { width:36px; height:36px; border:3px solid var(--border2); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; }
-  @keyframes spin { to { transform:rotate(360deg); } }
-  .loading-text { font-size:13px; color:var(--muted); }
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);}
+.empty .eicon{font-size:52px;margin-bottom:14px;}
+.empty h3{font-size:15px;color:var(--text);margin-bottom:6px;}
 
-  /* MODAL */
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
-  .modal-overlay.open { display:flex; }
-  .modal { background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius-lg); width:100%; max-width:560px; max-height:92vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,0.6); }
-  .modal-hdr { padding:18px 22px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:var(--surface); z-index:1; }
-  .modal-ttl { font-size:15px; font-weight:700; }
-  .modal-x { background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; padding:4px; border-radius:6px; line-height:1; }
-  .modal-x:hover { color:var(--text); background:var(--surface2); }
-  .modal-body { padding:18px 22px; }
-  .flabel { font-size:11px; font-weight:600; color:var(--muted); margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:0.5px; }
-  .finput { width:100%; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13.5px; outline:none; transition:border-color 0.15s; }
-  .finput:focus { border-color:var(--accent); }
-  .finput::placeholder { color:var(--muted2); }
-  textarea.finput { min-height:80px; resize:vertical; font-family:inherit; }
-  select.finput { appearance:none; cursor:pointer; }
-  .frow { margin-bottom:14px; }
-  .frow2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
-  .search-results { margin-top:6px; border:1px solid var(--border2); border-radius:8px; overflow:hidden; max-height:220px; overflow-y:auto; display:none; }
-  .search-results.visible { display:block; }
-  .search-result-item { display:flex; align-items:center; gap:10px; padding:8px 10px; cursor:pointer; transition:background 0.12s; border-bottom:1px solid var(--border); }
-  .search-result-item:last-child { border-bottom:none; }
-  .search-result-item:hover { background:var(--surface2); }
-  .sri-cover { width:32px; height:48px; object-fit:cover; border-radius:4px; background:var(--surface3); flex-shrink:0; }
-  .sri-cover-ph { width:32px; height:48px; border-radius:4px; background:var(--surface3); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-  .sri-title { font-size:13px; font-weight:500; }
-  .sri-meta { font-size:11px; color:var(--muted); margin-top:2px; }
-  .searching-msg { padding:12px; text-align:center; font-size:12px; color:var(--muted); }
-  .cover-prev { width:100%; height:130px; border-radius:8px; background:var(--surface3); display:flex; align-items:center; justify-content:center; margin-top:8px; overflow:hidden; }
-  .cover-prev img { width:100%; height:100%; object-fit:cover; }
-  .modal-ftr { padding:14px 22px 18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
-  .btn-cancel { padding:8px 18px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); color:var(--muted); font-size:13px; cursor:pointer; }
-  .btn-cancel:hover { color:var(--text); }
-  .btn-save { padding:8px 20px; border-radius:8px; background:var(--accent); border:none; color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
-  .btn-save:hover { background:var(--accent2); }
+/* LOADING */
+.loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200;flex-direction:column;gap:14px;}
+.spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-text{font-size:13px;color:var(--muted);}
 
-  /* TOASTS */
-  #toast-container { position:fixed; bottom:20px; right:20px; z-index:999; display:flex; flex-direction:column; gap:8px; }
-  .toast { background:var(--surface); border:1px solid var(--border2); border-radius:8px; padding:10px 16px; font-size:13px; color:var(--text); box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:slidein 0.25s ease; max-width:280px; }
-  @keyframes slidein { from { transform:translateX(40px); opacity:0; } to { transform:translateX(0); opacity:1; } }
-  .toast.success { border-left:3px solid var(--success); }
-  .toast.error { border-left:3px solid var(--danger); }
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.6);}
+.modal-hdr{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;}
+.modal-ttl{font-size:15px;font-weight:700;}
+.modal-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;border-radius:6px;line-height:1;}
+.modal-x:hover{color:var(--text);background:var(--surface2);}
+.modal-body{padding:18px 22px;}
+.flabel{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px;}
+.finput{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13.5px;outline:none;transition:border-color .15s;}
+.finput:focus{border-color:var(--accent);}
+.finput::placeholder{color:var(--muted2);}
+textarea.finput{min-height:80px;resize:vertical;font-family:inherit;}
+select.finput{appearance:none;cursor:pointer;}
+.frow{margin-bottom:14px;}
+.frow2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.search-results{margin-top:6px;border:1px solid var(--border2);border-radius:8px;overflow:hidden;max-height:220px;overflow-y:auto;display:none;}
+.search-results.visible{display:block;}
+.search-result-item{display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border);}
+.search-result-item:last-child{border-bottom:none;}
+.search-result-item:hover{background:var(--surface2);}
+.sri-cover{width:32px;height:48px;object-fit:cover;border-radius:4px;background:var(--surface3);flex-shrink:0;}
+.sri-cover-ph{width:32px;height:48px;border-radius:4px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.sri-title{font-size:13px;font-weight:500;}
+.sri-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.searching-msg{padding:12px;text-align:center;font-size:12px;color:var(--muted);}
+.cover-prev{width:100%;height:130px;border-radius:8px;background:var(--surface3);display:flex;align-items:center;justify-content:center;margin-top:8px;overflow:hidden;}
+.cover-prev img{width:100%;height:100%;object-fit:cover;}
+.modal-ftr{padding:14px 22px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+.btn-cancel{padding:8px 18px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-size:13px;cursor:pointer;}
+.btn-cancel:hover{color:var(--text);}
+.btn-save{padding:8px 20px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;}
+.btn-save:hover{background:var(--accent2);}
 
-  @media (max-width:700px) {
-    .sidebar { width:56px; }
-    .logo-text,.logo-sub,.nav-item .nav-lbl,.nav-count,.add-cat-btn span:not(:first-child),.user-name,.user-logout { display:none; }
-    .user-pill { padding:6px; justify-content:center; }
-    .sidebar-logo { padding:12px 8px; justify-content:center; }
-    .detail-panel.open { position:fixed; inset:0; width:100%; z-index:50; }
-    .search-box { display:none; }
-    .topbar { padding:10px 14px; }
-    .content { padding:12px 14px; }
-    .grid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; }
-    .frow2 { grid-template-columns:1fr; }
-  }
+/* TOASTS */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slidein .25s ease;max-width:280px;}
+@keyframes slidein{from{transform:translateX(40px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.toast.success{border-left:3px solid var(--success);}
+.toast.error{border-left:3px solid var(--danger);}
+
+@media(max-width:700px){
+  .sidebar{width:56px;}
+  .logo-text,.logo-sub,.nav-item .nav-lbl,.nav-count,.add-cat-btn span:not(:first-child),.user-name,.user-logout{display:none;}
+  .user-pill{padding:6px;justify-content:center;}
+  .sidebar-logo{padding:12px 8px;justify-content:center;}
+  .detail-panel.open{position:fixed;inset:0;width:100%;z-index:50;}
+  .search-box{display:none;}
+  .topbar{padding:10px 14px;}
+  .content{padding:12px 14px;}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}
+  .frow2{grid-template-columns:1fr;}
+  .scan-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
@@ -215,9 +239,7 @@
     <input class="auth-input" id="auth-pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
     <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Se connecter</button>
     <div class="auth-error" id="auth-error"></div>
-    <div class="auth-toggle" id="auth-toggle">
-      Pas encore de compte ? <a onclick="switchMode()">Créer un compte</a>
-    </div>
+    <div class="auth-toggle" id="auth-toggle">Pas encore de compte ? <a onclick="switchMode()">Créer un compte</a></div>
   </div>
 </div>
 
@@ -236,9 +258,7 @@
     </div>
     <nav class="sidebar-nav" id="sidebar-nav"><div class="nav-label">Catégories</div></nav>
     <div class="sidebar-footer">
-      <button class="add-cat-btn" onclick="openCatModal()">
-        <span style="font-size:16px">+</span><span>Nouvelle catégorie</span>
-      </button>
+      <button class="add-cat-btn" onclick="openCatModal()"><span style="font-size:16px">+</span><span>Nouvelle catégorie</span></button>
     </div>
   </div>
 
@@ -250,14 +270,14 @@
       </div>
       <div class="search-box">
         <span style="color:var(--muted)">⌕</span>
-        <input type="text" placeholder="Rechercher…" id="search-input" oninput="renderGrid()">
+        <input type="text" placeholder="Rechercher…" id="search-input" oninput="renderMain()">
       </div>
       <div class="filter-tabs" id="filter-tabs"></div>
-      <button class="add-btn" onclick="openItemModal()">＋ Ajouter</button>
+      <button class="add-btn" id="main-add-btn" onclick="handleAddBtn()">＋ Ajouter</button>
     </div>
-    <div class="content">
+    <div class="content" id="main-content">
       <div class="stats-row" id="stats-row"></div>
-      <div class="grid" id="items-grid"></div>
+      <div id="items-grid"></div>
     </div>
   </div>
 
@@ -272,7 +292,7 @@
 </div>
 </div>
 
-<!-- ITEM MODAL -->
+<!-- ITEM MODAL (manga/livres/jeux/films) -->
 <div class="modal-overlay" id="item-modal">
   <div class="modal">
     <div class="modal-hdr">
@@ -281,41 +301,29 @@
     </div>
     <div class="modal-body">
       <div class="frow">
-        <label class="flabel">Recherche automatique</label>
-        <input class="finput" id="f-search" placeholder="Tape un titre pour chercher couverture + infos…" oninput="onSearchInput()" autocomplete="off">
+        <label class="flabel">Recherche automatique (couverture + tomes)</label>
+        <input class="finput" id="f-search" placeholder="Tape un titre…" oninput="onSearchInput()" autocomplete="off">
         <div class="search-results" id="search-results"></div>
       </div>
-      <div class="frow">
-        <label class="flabel">Titre *</label>
-        <input class="finput" id="f-title" placeholder="Ex: Naruto, Elden Ring…">
-      </div>
+      <div class="frow"><label class="flabel">Titre *</label><input class="finput" id="f-title" placeholder="Ex: One Piece, Elden Ring…"></div>
       <div class="frow2">
-        <div>
-          <label class="flabel">Possession</label>
+        <div><label class="flabel">Possession</label>
           <select class="finput" id="f-owned">
             <option value="owned">✓ Possédé</option>
             <option value="notowned">✗ Non possédé</option>
             <option value="wishlist">♡ Souhait</option>
           </select>
         </div>
-        <div>
-          <label class="flabel" id="status-lbl">Statut</label>
-          <select class="finput" id="f-status"></select>
-        </div>
+        <div><label class="flabel" id="status-lbl">Statut</label><select class="finput" id="f-status"></select></div>
       </div>
-      <div class="frow">
-        <label class="flabel" id="progress-lbl">Progression</label>
-        <input class="finput" id="f-progress" placeholder="Ex: Tome 12, 34h…">
+      <div class="frow" id="tomes-row" style="display:none">
+        <label class="flabel">Nombre de tomes total</label>
+        <input class="finput" id="f-tomes" type="number" min="1" max="9999" placeholder="Ex: 108">
+        <div style="font-size:11px;color:var(--muted);margin-top:5px">💡 Rempli automatiquement si trouvé via la recherche</div>
       </div>
-      <div class="frow">
-        <label class="flabel">Image (URL)</label>
-        <input class="finput" id="f-image" placeholder="https://…" oninput="updateCoverPreview()">
-        <div class="cover-prev" id="cover-prev"><span style="color:var(--muted2);font-size:12px">Aperçu de la couverture</span></div>
-      </div>
-      <div class="frow">
-        <label class="flabel">Description</label>
-        <textarea class="finput" id="f-desc" placeholder="Notes, avis…"></textarea>
-      </div>
+      <div class="frow" id="progress-row"><label class="flabel" id="progress-lbl">Progression</label><input class="finput" id="f-progress" placeholder="Ex: 34h…"></div>
+      <div class="frow"><label class="flabel">Image (URL)</label><input class="finput" id="f-image" placeholder="https://…" oninput="updateCoverPreview()"><div class="cover-prev" id="cover-prev"><span style="color:var(--muted2);font-size:12px">Aperçu</span></div></div>
+      <div class="frow"><label class="flabel">Description</label><textarea class="finput" id="f-desc" placeholder="Notes, avis…"></textarea></div>
     </div>
     <div class="modal-ftr">
       <button class="btn-cancel" onclick="closeItemModal()">Annuler</button>
@@ -324,47 +332,56 @@
   </div>
 </div>
 
-<!-- CAT MODAL -->
-<div class="modal-overlay" id="cat-modal">
+<!-- SCAN MODAL -->
+<div class="modal-overlay" id="scan-modal">
   <div class="modal">
     <div class="modal-hdr">
-      <div class="modal-ttl">Nouvelle catégorie</div>
-      <button class="modal-x" onclick="closeCatModal()">✕</button>
+      <div class="modal-ttl" id="scan-modal-ttl">Ajouter un suivi scan</div>
+      <button class="modal-x" onclick="closeScanModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="frow">
-        <label class="flabel">Nom *</label>
-        <input class="finput" id="cat-name" placeholder="Ex: Figurines, Vinyles…">
+        <label class="flabel">Recherche manga</label>
+        <input class="finput" id="sf-search" placeholder="Tape un titre…" oninput="onScanSearchInput()" autocomplete="off">
+        <div class="search-results" id="scan-search-results"></div>
       </div>
+      <div class="frow"><label class="flabel">Titre *</label><input class="finput" id="sf-title" placeholder="Ex: One Piece"></div>
       <div class="frow2">
-        <div>
-          <label class="flabel">Icône (emoji)</label>
-          <input class="finput" id="cat-icon" placeholder="🎸" maxlength="2">
-        </div>
-        <div>
-          <label class="flabel">Type de recherche</label>
+        <div><label class="flabel">Chapitre actuel</label><input class="finput" id="sf-chapter" type="number" min="0" placeholder="Ex: 1114"></div>
+        <div><label class="flabel">Total chapitres (optionnel)</label><input class="finput" id="sf-total" type="number" min="0" placeholder="Ex: 1114"></div>
+      </div>
+      <div class="frow"><label class="flabel">Image (URL)</label><input class="finput" id="sf-image" placeholder="https://…" oninput="updateScanPreview()"><div class="cover-prev" id="scan-cover-prev"><span style="color:var(--muted2);font-size:12px">Aperçu</span></div></div>
+      <div class="frow"><label class="flabel">Notes</label><textarea class="finput" id="sf-notes" placeholder="Ex: Pause, en attente de scans…"></textarea></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-cancel" onclick="closeScanModal()">Annuler</button>
+      <button class="btn-save" onclick="saveScan()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAT MODAL -->
+<div class="modal-overlay" id="cat-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-ttl">Nouvelle catégorie</div><button class="modal-x" onclick="closeCatModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="frow"><label class="flabel">Nom *</label><input class="finput" id="cat-name" placeholder="Ex: Figurines…"></div>
+      <div class="frow2">
+        <div><label class="flabel">Icône (emoji)</label><input class="finput" id="cat-icon" placeholder="🎸" maxlength="2"></div>
+        <div><label class="flabel">Type de recherche</label>
           <select class="finput" id="cat-api">
-            <option value="game">Jeux vidéo (RAWG)</option>
-            <option value="manga">Mangas (Jikan)</option>
-            <option value="book">Livres (OpenLibrary)</option>
-            <option value="tmdb">Films / Séries (TMDB)</option>
-            <option value="none">Aucune (manuel)</option>
+            <option value="game">Jeux vidéo</option>
+            <option value="manga">Mangas</option>
+            <option value="book">Livres</option>
+            <option value="tmdb">Films / Séries</option>
+            <option value="none">Aucune</option>
           </select>
         </div>
       </div>
-      <div class="frow">
-        <label class="flabel">Label activité (ex: Joué, Lu, Regardé…)</label>
-        <input class="finput" id="cat-status" placeholder="Ex: Joué">
-      </div>
-      <div class="frow">
-        <label class="flabel">Label progression (ex: Heures, Tome, Épisode…)</label>
-        <input class="finput" id="cat-progress" placeholder="Ex: Heures de jeu">
-      </div>
+      <div class="frow"><label class="flabel">Label activité</label><input class="finput" id="cat-status" placeholder="Ex: Joué"></div>
+      <div class="frow"><label class="flabel">Label progression</label><input class="finput" id="cat-progress" placeholder="Ex: Heures de jeu"></div>
     </div>
-    <div class="modal-ftr">
-      <button class="btn-cancel" onclick="closeCatModal()">Annuler</button>
-      <button class="btn-save" onclick="saveCat()">Créer</button>
-    </div>
+    <div class="modal-ftr"><button class="btn-cancel" onclick="closeCatModal()">Annuler</button><button class="btn-save" onclick="saveCat()">Créer</button></div>
   </div>
 </div>
 
@@ -373,169 +390,160 @@
 <script>
 // ══════════════════════════════════════════
 //  ⚙️  CONFIG FIREBASE
-//  1. Va sur https://console.firebase.google.com
-//  2. Crée un projet → Ajouter une appli web
-//  3. Copie ton firebaseConfig ici
-//  4. Dans Firestore → crée une base en mode "test"
-//  5. PAS besoin d'activer Authentication !
+//  1. https://console.firebase.google.com
+//  2. Créer projet → appli web → copier firebaseConfig
+//  3. Firestore → créer base en mode "test"
 // ══════════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyBvCTNvHncSPgbKaQ4W1UiRMUM5j9a5KWU",
-  projectId: "collecto-55aa4",
-  storageBucket: "collecto-55aa4.firebasestorage.app",
-  messagingSenderId: "324623659789",
-  appId: "1:324623659789:web:a388237ddadde2b9f77644"
+  apiKey: "REMPLACE_PAR_TA_CLE_API",
+  projectId: "REMPLACE_PAR_TON_PROJECT_ID",
+  storageBucket: "REMPLACE_PAR_TON_STORAGE_BUCKET",
+  messagingSenderId: "REMPLACE_PAR_TON_SENDER_ID",
+  appId: "REMPLACE_PAR_TON_APP_ID"
 };
 
-// ══════════════════════════════════════════
-//  🔑  CLÉS API (optionnelles)
-//  RAWG  → https://rawg.io/apidocs  (gratuit)
-//  TMDB  → https://www.themoviedb.org/settings/api  (gratuit)
-//  Jikan & OpenLibrary → gratuits, sans clé
-// ══════════════════════════════════════════
-const RAWG_KEY  = "";
-const TMDB_KEY  = "";
+// 🔑 CLÉS API OPTIONNELLES
+const RAWG_KEY = ""; // https://rawg.io/apidocs
+const TMDB_KEY = ""; // https://themoviedb.org/settings/api
 
-// ── Init Firebase (Firestore seulement, pas d'Auth) ──
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 
 // ── State ──
-let currentUser  = null; // { uid, pseudo }
-let categories   = [];
-let items        = [];
-let activeCatId  = null;
+let currentUser = null;
+let categories  = [];
+let items       = [];   // items normaux (manga, jeux, livres, films)
+let scanItems   = [];   // suivi scan/chapitres
+let activeCatId = null;
 let activeFilter = 'all';
 let editingItemId = null;
+let editingScanId = null;
 let selectedItemId = null;
-let searchTimer  = null;
-let isRegister   = false;
+let searchTimer = null;
+let scanSearchTimer = null;
+let isRegister  = false;
+
+const CAT_SCAN_ID = '__scan__';
 
 const DEFAULT_CATS = [
-  { id:'games', name:'Jeux vidéo',    icon:'🎮', statusLabel:'Joué',    progressLabel:'Heures de jeu',    api:'game',  statuses:['Joué','En cours','Non joué','Abandonné'] },
-  { id:'manga', name:'Mangas / BD',   icon:'📚', statusLabel:'Lu',      progressLabel:'Tome / Chapitre',  api:'manga', statuses:['Lu','En cours','Non lu','Abandonné'] },
-  { id:'books', name:'Livres',        icon:'📖', statusLabel:'Lu',      progressLabel:'Page',             api:'book',  statuses:['Lu','En cours','Non lu','Abandonné'] },
-  { id:'films', name:'Films / Séries',icon:'🎬', statusLabel:'Regardé', progressLabel:'Saison / Épisode', api:'tmdb',  statuses:['Regardé','En cours','Non regardé','Abandonné'] },
+  { id:'games', name:'Jeux vidéo',    icon:'🎮', statusLabel:'Joué',    progressLabel:'Heures de jeu',   api:'game',  hasTomes:false, statuses:['Joué','En cours','Non joué','Abandonné'] },
+  { id:'manga', name:'Mangas / BD',   icon:'📚', statusLabel:'Lu',      progressLabel:'Tome / Chapitre', api:'manga', hasTomes:true,  statuses:['Lu','En cours','Non lu','Abandonné'] },
+  { id:'books', name:'Livres',        icon:'📖', statusLabel:'Lu',      progressLabel:'Page',            api:'book',  hasTomes:false, statuses:['Lu','En cours','Non lu','Abandonné'] },
+  { id:'films', name:'Films / Séries',icon:'🎬', statusLabel:'Regardé', progressLabel:'Saison/Épisode',  api:'tmdb',  hasTomes:false, statuses:['Regardé','En cours','Non regardé','Abandonné'] },
+  { id:CAT_SCAN_ID, name:'Scans',     icon:'📡', statusLabel:'',        progressLabel:'Chapitre',        api:'manga', hasTomes:false, statuses:[], isScan:true },
 ];
 
 // ══════════════════════════════════════════
-//  AUTH SIMPLE — pseudo + mot de passe hashé dans Firestore
-//  Pas de Firebase Auth — juste une collection "users"
-//  Structure : users/{pseudo} → { passwordHash, createdAt }
-//  Session : localStorage pour persister la session
+//  AUTH
 // ══════════════════════════════════════════
-
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-
 function switchMode() {
   isRegister = !isRegister;
   document.getElementById('auth-btn').textContent = isRegister ? 'Créer le compte' : 'Se connecter';
-  document.getElementById('auth-sub').innerHTML = isRegister
-    ? 'Choisis un pseudo et un mot de passe.'
-    : 'Connecte-toi pour retrouver<br>ta collection sur tous tes appareils.';
-  document.getElementById('auth-toggle').innerHTML = isRegister
-    ? 'Déjà un compte ? <a onclick="switchMode()">Se connecter</a>'
-    : 'Pas encore de compte ? <a onclick="switchMode()">Créer un compte</a>';
+  document.getElementById('auth-sub').innerHTML = isRegister ? 'Choisis un pseudo et un mot de passe.' : 'Connecte-toi pour retrouver<br>ta collection sur tous tes appareils.';
+  document.getElementById('auth-toggle').innerHTML = isRegister ? 'Déjà un compte ? <a onclick="switchMode()">Se connecter</a>' : 'Pas encore de compte ? <a onclick="switchMode()">Créer un compte</a>';
   document.getElementById('auth-error').textContent = '';
 }
-
 function setAuthError(msg) { document.getElementById('auth-error').textContent = msg; }
-
 async function handleAuth() {
   const pseudo = document.getElementById('auth-pseudo').value.trim().toLowerCase();
   const pass   = document.getElementById('auth-pass').value;
-  if (!pseudo || !pass) return setAuthError('Remplis tous les champs.');
-  if (pseudo.length < 2) return setAuthError('Pseudo trop court (2 caractères min).');
-  if (pass.length < 4)   return setAuthError('Mot de passe trop court (4 caractères min).');
-
-  const hash = await sha256(pass + pseudo); // sel = pseudo
+  if (!pseudo||!pass) return setAuthError('Remplis tous les champs.');
+  if (pseudo.length<2) return setAuthError('Pseudo trop court (2 car. min).');
+  if (pass.length<4)   return setAuthError('Mot de passe trop court (4 car. min).');
+  const hash = await sha256(pass+pseudo);
   const userRef = db.collection('users').doc(pseudo);
-
   try {
     if (isRegister) {
       const snap = await userRef.get();
       if (snap.exists) return setAuthError('Ce pseudo est déjà pris.');
-      await userRef.set({ passwordHash: hash, createdAt: Date.now() });
-      toast('Compte créé !', 'success');
+      await userRef.set({ passwordHash:hash, createdAt:Date.now() });
+      toast('Compte créé !','success');
     } else {
       const snap = await userRef.get();
       if (!snap.exists) return setAuthError('Pseudo introuvable.');
-      if (snap.data().passwordHash !== hash) return setAuthError('Mot de passe incorrect.');
+      if (snap.data().passwordHash!==hash) return setAuthError('Mot de passe incorrect.');
     }
-    // Session
-    localStorage.setItem('collecto_session', JSON.stringify({ uid: pseudo, pseudo }));
+    localStorage.setItem('collecto_session', JSON.stringify({uid:pseudo}));
     await startSession(pseudo);
-  } catch(e) {
-    setAuthError('Erreur de connexion. Vérifie ta config Firebase.');
-    console.error(e);
-  }
+  } catch(e) { setAuthError('Erreur Firebase. Vérifie ta config.'); console.error(e); }
 }
-
 async function startSession(pseudo) {
-  currentUser = { uid: pseudo, pseudo };
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display = 'block';
-  document.getElementById('user-name').textContent = pseudo;
+  currentUser = {uid:pseudo,pseudo};
+  document.getElementById('auth-screen').style.display  = 'none';
+  document.getElementById('app-screen').style.display   = 'block';
+  document.getElementById('user-name').textContent   = pseudo;
   document.getElementById('user-avatar').textContent = pseudo[0].toUpperCase();
   await loadUserData();
   render();
 }
-
 function logout() {
   localStorage.removeItem('collecto_session');
-  currentUser = null; categories = []; items = [];
-  document.getElementById('app-screen').style.display = 'none';
+  currentUser=null; categories=[]; items=[]; scanItems=[];
+  document.getElementById('app-screen').style.display  = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
-  document.getElementById('auth-pseudo').value = '';
-  document.getElementById('auth-pass').value = '';
+  ['auth-pseudo','auth-pass'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('auth-error').textContent = '';
   toast('Déconnecté');
 }
-
-// Restore session on load
 async function init() {
   const saved = localStorage.getItem('collecto_session');
   if (saved) {
     try {
-      const { uid } = JSON.parse(saved);
-      // Verify user still exists
+      const {uid} = JSON.parse(saved);
       const snap = await db.collection('users').doc(uid).get();
       if (snap.exists) { await startSession(uid); return; }
     } catch(e) { localStorage.removeItem('collecto_session'); }
   }
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('loading').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
 }
 
 // ══════════════════════════════════════════
-//  FIRESTORE DATA
+//  FIRESTORE
 // ══════════════════════════════════════════
 async function loadUserData() {
-  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('loading').style.display='flex';
   const uid = currentUser.uid;
+  // Categories
   const catSnap = await db.collection('users').doc(uid).collection('categories').orderBy('order').get();
   if (catSnap.empty) {
     categories = DEFAULT_CATS;
-    for (let i = 0; i < categories.length; i++) {
-      await db.collection('users').doc(uid).collection('categories').doc(categories[i].id).set({ ...categories[i], order: i });
-    }
+    for (let i=0;i<categories.length;i++)
+      await db.collection('users').doc(uid).collection('categories').doc(categories[i].id).set({...categories[i],order:i});
   } else {
-    categories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    categories = catSnap.docs.map(d=>({id:d.id,...d.data()}));
+    // Ajouter Scans si absent
+    if (!categories.find(c=>c.id===CAT_SCAN_ID)) {
+      const scanCat = DEFAULT_CATS.find(c=>c.id===CAT_SCAN_ID);
+      scanCat.order = categories.length;
+      await db.collection('users').doc(uid).collection('categories').doc(CAT_SCAN_ID).set(scanCat);
+      categories.push(scanCat);
+    }
   }
+  // Items
   const itemSnap = await db.collection('users').doc(uid).collection('items').orderBy('createdAt','desc').get();
-  items = itemSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  items = itemSnap.docs.map(d=>({id:d.id,...d.data()}));
+  // Scan items
+  const scanSnap = await db.collection('users').doc(uid).collection('scans').orderBy('updatedAt','desc').get();
+  scanItems = scanSnap.docs.map(d=>({id:d.id,...d.data()}));
   activeCatId = categories[0]?.id || null;
-  document.getElementById('loading').style.display = 'none';
+  document.getElementById('loading').style.display='none';
 }
-
 async function saveItemToDb(item) {
   await db.collection('users').doc(currentUser.uid).collection('items').doc(item.id).set(item);
 }
 async function deleteItemFromDb(id) {
   await db.collection('users').doc(currentUser.uid).collection('items').doc(id).delete();
+}
+async function saveScanToDb(s) {
+  await db.collection('users').doc(currentUser.uid).collection('scans').doc(s.id).set(s);
+}
+async function deleteScanFromDb(id) {
+  await db.collection('users').doc(currentUser.uid).collection('scans').doc(id).delete();
 }
 async function saveCatToDb(cat) {
   await db.collection('users').doc(currentUser.uid).collection('categories').doc(cat.id).set(cat);
@@ -545,69 +553,59 @@ async function saveCatToDb(cat) {
 //  COVER SEARCH
 // ══════════════════════════════════════════
 async function searchCovers(q, api) {
-  if (!q || q.length < 2) return [];
+  if (!q||q.length<2) return [];
   try {
-    if (api === 'game')  return await searchGame(q);
-    if (api === 'manga') return await searchManga(q);
-    if (api === 'book')  return await searchBook(q);
-    if (api === 'tmdb')  return await searchTMDB(q);
-  } catch(e) { console.warn('Search error', e); }
+    if (api==='game')  return await searchGame(q);
+    if (api==='manga') return await searchManga(q);
+    if (api==='book')  return await searchBook(q);
+    if (api==='tmdb')  return await searchTMDB(q);
+  } catch(e) { console.warn(e); }
   return [];
 }
-
 async function searchGame(q) {
   if (!RAWG_KEY) return [];
-  const r = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(q)}&page_size=6`);
-  const d = await r.json();
-  return (d.results||[]).map(g => ({ title:g.name, cover:g.background_image, meta:g.released?.slice(0,4)||'' }));
+  const r=await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(q)}&page_size=6`);
+  const d=await r.json();
+  return (d.results||[]).map(g=>({title:g.name,cover:g.background_image,meta:g.released?.slice(0,4)||'',volumes:0}));
 }
-
 async function searchManga(q) {
-  const r = await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(q)}&limit=6`);
-  const d = await r.json();
-  return (d.data||[]).map(m => ({ title:m.title, cover:m.images?.jpg?.large_image_url||m.images?.jpg?.image_url, meta:m.status||'' }));
+  const r=await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(q)}&limit=6`);
+  const d=await r.json();
+  return (d.data||[]).map(m=>({
+    title:m.title,
+    cover:m.images?.jpg?.large_image_url||m.images?.jpg?.image_url,
+    meta:m.status||'',
+    volumes: m.volumes || 0,
+    chapters: m.chapters || 0,
+  }));
 }
-
 async function searchBook(q) {
-  const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=title,author_name,cover_i`);
-  const d = await r.json();
-  return (d.docs||[]).slice(0,6).map(b => ({ title:b.title, cover:b.cover_i?`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`:null, meta:b.author_name?.[0]||'' }));
+  const r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=title,author_name,cover_i`);
+  const d=await r.json();
+  return (d.docs||[]).slice(0,6).map(b=>({title:b.title,cover:b.cover_i?`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`:null,meta:b.author_name?.[0]||'',volumes:0}));
 }
-
 async function searchTMDB(q) {
   if (!TMDB_KEY) return [];
-  const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
-  const d = await r.json();
-  return (d.results||[]).slice(0,6).filter(x=>x.poster_path).map(x => ({ title:x.title||x.name, cover:`https://image.tmdb.org/t/p/w300${x.poster_path}`, meta:(x.release_date||x.first_air_date||'').slice(0,4) }));
+  const r=await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
+  const d=await r.json();
+  return (d.results||[]).slice(0,6).filter(x=>x.poster_path).map(x=>({title:x.title||x.name,cover:`https://image.tmdb.org/t/p/w300${x.poster_path}`,meta:(x.release_date||x.first_air_date||'').slice(0,4),volumes:0}));
 }
 
 // ══════════════════════════════════════════
 //  RENDER
 // ══════════════════════════════════════════
-function getActiveCat() { return categories.find(c => c.id === activeCatId); }
-
-function getCatItems(catId) {
-  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
-  return items.filter(i => {
-    if (i.catId !== catId) return false;
-    if (q && !i.title.toLowerCase().includes(q)) return false;
-    if (activeFilter==='owned')    return i.owned==='owned';
-    if (activeFilter==='notowned') return i.owned!=='owned';
-    if (activeFilter==='done')     { const c=getActiveCat(); return c && i.status===c.statuses[0]; }
-    if (activeFilter==='inprogress') return i.status==='En cours';
-    return true;
-  });
-}
+function getActiveCat() { return categories.find(c=>c.id===activeCatId); }
+function isScanMode() { return activeCatId===CAT_SCAN_ID; }
 
 function renderSidebar() {
   const nav = document.getElementById('sidebar-nav');
   nav.innerHTML = '<div class="nav-label">Catégories</div>';
   categories.forEach(cat => {
-    const count = items.filter(i=>i.catId===cat.id).length;
+    const count = cat.isScan ? scanItems.length : items.filter(i=>i.catId===cat.id).length;
     const btn = document.createElement('button');
     btn.className = 'nav-item'+(cat.id===activeCatId?' active':'');
     btn.innerHTML = `<span class="nav-icon">${cat.icon}</span><span class="nav-lbl">${cat.name}</span><span class="nav-count">${count}</span>`;
-    btn.onclick = () => { activeCatId=cat.id; activeFilter='all'; closeDetail(); render(); };
+    btn.onclick = ()=>{ activeCatId=cat.id; activeFilter='all'; closeDetail(); render(); };
     nav.appendChild(btn);
   });
 }
@@ -615,17 +613,22 @@ function renderSidebar() {
 function renderTopbar() {
   const cat = getActiveCat(); if (!cat) return;
   document.getElementById('topbar-title').textContent = cat.name;
+  if (cat.isScan) {
+    document.getElementById('topbar-sub').textContent = `${scanItems.length} manga${scanItems.length!==1?'s':''} suivis`;
+    document.getElementById('filter-tabs').innerHTML = '';
+    document.getElementById('main-add-btn').textContent = '＋ Ajouter';
+    return;
+  }
   const total = items.filter(i=>i.catId===cat.id).length;
   document.getElementById('topbar-sub').textContent = `${total} item${total!==1?'s':''}`;
-  const filters = [['all','Tous'],['owned','Possédés'],['inprogress','En cours'],['done','Terminés'],['notowned','Non possédés']];
-  document.getElementById('filter-tabs').innerHTML = filters.map(([f,l]) =>
-    `<button class="ftab ${activeFilter===f?'active':''}" onclick="setFilter('${f}')">${l}</button>`
-  ).join('');
+  const filters = [['all','Tous'],['owned','Possédés'],['inprogress','En cours'],['done','Terminés']];
+  document.getElementById('filter-tabs').innerHTML = filters.map(([f,l])=>`<button class="ftab ${activeFilter===f?'active':''}" onclick="setFilter('${f}')">${l}</button>`).join('');
+  document.getElementById('main-add-btn').textContent = '＋ Ajouter';
 }
 
 function renderStats() {
-  const cat = getActiveCat(); if (!cat) return;
-  const all = items.filter(i=>i.catId===cat.id);
+  const cat = getActiveCat(); if (!cat||cat.isScan) { document.getElementById('stats-row').innerHTML=''; return; }
+  const all   = items.filter(i=>i.catId===cat.id);
   const owned = all.filter(i=>i.owned==='owned').length;
   const done  = all.filter(i=>i.status===cat.statuses[0]).length;
   const prog  = all.filter(i=>i.status==='En cours').length;
@@ -637,31 +640,89 @@ function renderStats() {
   `;
 }
 
-function renderGrid() {
+function renderMain() {
+  if (isScanMode()) { renderScanGrid(); return; }
   const cat = getActiveCat(); if (!cat) return;
-  const its = getCatItems(cat.id);
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
   const grid = document.getElementById('items-grid');
+  let its = items.filter(i=>i.catId===cat.id);
+  if (q) its = its.filter(i=>i.title.toLowerCase().includes(q));
+  if (activeFilter==='owned')      its = its.filter(i=>i.owned==='owned');
+  if (activeFilter==='notowned')   its = its.filter(i=>i.owned!=='owned');
+  if (activeFilter==='done')       its = its.filter(i=>i.status===cat.statuses[0]);
+  if (activeFilter==='inprogress') its = its.filter(i=>i.status==='En cours');
+
   if (!its.length) {
-    grid.innerHTML = `<div class="empty"><div class="eicon">${cat.icon}</div><h3>Aucun item pour l'instant</h3><p>Clique sur "＋ Ajouter" pour commencer.</p></div>`;
+    grid.className='grid';
+    grid.innerHTML=`<div class="empty"><div class="eicon">${cat.icon}</div><h3>Aucun item pour l'instant</h3><p>Clique sur "＋ Ajouter" pour commencer.</p></div>`;
     return;
   }
-  grid.innerHTML = its.map(item => {
+  grid.className='grid';
+  grid.innerHTML = its.map(item=>{
     const ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Souhait</span>':'<span class="badge b-notowned">Non possédé</span>';
     const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}">${item.status}</span>`:'';
+    // Tome progress badge
+    let tomeBadge = '';
+    if (cat.hasTomes && item.totalTomes>0) {
+      const ownedCount = (item.ownedTomes||[]).length;
+      tomeBadge = `<span class="badge b-scan">${ownedCount}/${item.totalTomes} t.</span>`;
+    }
     const cover = item.image
-      ? `<img class="item-cover" src="${item.image}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="item-cover-ph" style="display:none">${cat.icon}</div>`
-      : `<div class="item-cover-ph">${cat.icon}</div>`;
+      ?`<img class="item-cover" src="${item.image}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="item-cover-ph" style="display:none">${cat.icon}</div>`
+      :`<div class="item-cover-ph">${cat.icon}</div>`;
     return `<div class="item-card${selectedItemId===item.id?' selected':''}" onclick="selectItem('${item.id}')">
       ${cover}
       <div class="item-body">
         <div class="item-title">${esc(item.title)}</div>
-        ${item.progress?`<div class="item-meta">${esc(cat.progressLabel)}: ${esc(item.progress)}</div>`:''}
-        <div class="item-badges">${ob}${sb}</div>
+        ${item.progress?`<div class="item-meta">${esc(item.progress)}</div>`:''}
+        <div class="item-badges">${ob}${sb}${tomeBadge}</div>
       </div>
     </div>`;
   }).join('');
 }
 
+// ── SCAN GRID ──
+function renderScanGrid() {
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const grid = document.getElementById('items-grid');
+  document.getElementById('stats-row').innerHTML = '';
+  let its = scanItems;
+  if (q) its = its.filter(s=>s.title.toLowerCase().includes(q));
+  if (!its.length) {
+    grid.className='scan-grid';
+    grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="eicon">📡</div><h3>Aucun suivi scan</h3><p>Clique sur "＋ Ajouter" pour suivre un manga.</p></div>`;
+    return;
+  }
+  grid.className='scan-grid';
+  grid.innerHTML = its.map(s=>{
+    const pct = s.totalChapters>0 ? Math.min(100,Math.round((s.chapter/s.totalChapters)*100)) : 0;
+    const cover = s.image
+      ?`<img class="scan-cover" src="${s.image}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="scan-cover-ph" style="display:none">📡</div>`
+      :`<div class="scan-cover-ph">📡</div>`;
+    return `<div class="scan-card${selectedItemId===s.id?' selected':''}" onclick="selectScan('${s.id}')">
+      ${cover}
+      <div class="scan-body">
+        <div>
+          <div class="scan-title">${esc(s.title)}</div>
+          <div class="scan-chap">${s.chapter||0}</div>
+          <div class="scan-chap-label">chapitre actuel</div>
+          ${s.totalChapters>0?`<div class="scan-total">${pct}% · ${s.totalChapters} chap. total</div>`:''}
+          ${s.totalChapters>0?`<div class="tome-progress-bar"><div class="tome-progress-fill" style="width:${pct}%"></div></div>`:''}
+        </div>
+        <div class="scan-actions" onclick="event.stopPropagation()">
+          <button class="scan-btn" onclick="updateScanChapter('${s.id}',-1)" title="−1">−</button>
+          <input class="scan-chap-input" type="number" value="${s.chapter||0}" min="0"
+            onchange="setScanChapterDirect('${s.id}',this.value)"
+            onclick="this.select()">
+          <button class="scan-btn" onclick="updateScanChapter('${s.id}',1)" title="+1">+</button>
+          <button class="scan-btn" onclick="updateScanChapter('${s.id}',10)" title="+10" style="font-size:11px;width:36px">+10</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SELECT ITEM (manga/jeux etc.) ──
 function selectItem(id) {
   selectedItemId = id;
   const item = items.find(i=>i.id===id);
@@ -669,44 +730,150 @@ function selectItem(id) {
   if (!item||!cat) return;
   document.getElementById('detail-panel').classList.add('open');
   document.getElementById('detail-cover-zone').innerHTML = item.image
-    ? `<img class="detail-cover" src="${item.image}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="detail-cover-ph" style="display:none">${cat.icon}</div>`
-    : `<div class="detail-cover-ph">${cat.icon}</div>`;
+    ?`<img class="detail-cover" src="${item.image}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="detail-cover-ph" style="display:none">${cat.icon}</div>`
+    :`<div class="detail-cover-ph">${cat.icon}</div>`;
+
   const ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Liste de souhaits</span>':'<span class="badge b-notowned">Non possédé</span>';
-  const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}" style="font-size:11px;padding:3px 9px">${item.status}</span>`:'';
+  const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}" style="padding:3px 9px">${item.status}</span>`:'';
+
+  let tomesHTML = '';
+  if (cat.hasTomes && item.totalTomes>0) {
+    const owned  = item.ownedTomes||[];
+    const read   = item.readTomes||[];
+    const ownedC = owned.length;
+    const readC  = read.length;
+    const pct    = Math.round((ownedC/item.totalTomes)*100);
+    const tomeButtons = Array.from({length:item.totalTomes},(_,i)=>{
+      const n=i+1;
+      const isOwned = owned.includes(n);
+      const isRead  = read.includes(n);
+      const cls = isRead?'read':isOwned?'owned':'';
+      return `<button class="tome-btn ${cls}" onclick="toggleTome('${id}',${n})" title="Tome ${n}">${n}</button>`;
+    }).join('');
+    tomesHTML = `
+      <div class="detail-section">
+        <div class="detail-slabel">Tomes (${item.totalTomes} au total)</div>
+        <div class="tome-stats">
+          <div class="tome-stat"><div class="tome-stat-val" style="color:var(--success)">${ownedC}</div><div class="tome-stat-lbl">Possédés</div></div>
+          <div class="tome-stat"><div class="tome-stat-val" style="color:var(--accent2)">${readC}</div><div class="tome-stat-lbl">Lus</div></div>
+          <div class="tome-stat"><div class="tome-stat-val">${item.totalTomes-ownedC}</div><div class="tome-stat-lbl">Manquants</div></div>
+        </div>
+        <div class="tome-progress-bar"><div class="tome-progress-fill" style="width:${pct}%"></div></div>
+        <div class="tome-legend">
+          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(52,211,153,.4);border:2px solid #34d399"></div>Possédé</div>
+          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(124,107,250,.4);border:2px solid var(--accent2)"></div>Lu</div>
+          <div class="tome-legend-item"><div class="tome-legend-dot" style="background:var(--surface3);border:2px solid var(--border2)"></div>Non possédé</div>
+        </div>
+        <div class="tome-grid">${tomeButtons}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:8px">💡 Clic 1 = Possédé · Clic 2 = Lu · Clic 3 = Reset</div>
+      </div>`;
+  }
+
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-title">${esc(item.title)}</div>
     <div class="detail-cat">${cat.icon} ${cat.name}</div>
     <div class="detail-section"><div class="detail-slabel">Statut</div><div style="display:flex;gap:6px;flex-wrap:wrap">${ob}${sb}</div></div>
     ${item.progress?`<div class="detail-section"><div class="detail-slabel">${esc(cat.progressLabel)}</div><div class="detail-progress">${esc(item.progress)}</div></div>`:''}
+    ${tomesHTML}
     ${item.desc?`<div class="detail-section"><div class="detail-slabel">Description</div><div class="detail-desc">${esc(item.desc)}</div></div>`:''}
   `;
   document.getElementById('detail-actions').innerHTML = `
     <button class="dbtn dbtn-edit" onclick="openItemModal('${item.id}')">✏ Modifier</button>
     <button class="dbtn dbtn-del" onclick="deleteItem('${item.id}')">🗑 Supprimer</button>
   `;
-  renderGrid();
+  renderMain();
+}
+
+// ── TOGGLE TOME (possédé → lu → reset) ──
+async function toggleTome(itemId, tomeNum) {
+  const item = items.find(i=>i.id===itemId); if (!item) return;
+  const owned = [...(item.ownedTomes||[])];
+  const read  = [...(item.readTomes||[])];
+  const isOwned = owned.includes(tomeNum);
+  const isRead  = read.includes(tomeNum);
+  if (!isOwned && !isRead) {
+    owned.push(tomeNum); owned.sort((a,b)=>a-b);
+  } else if (isOwned && !isRead) {
+    read.push(tomeNum); read.sort((a,b)=>a-b);
+  } else {
+    const oi = owned.indexOf(tomeNum); if(oi>=0) owned.splice(oi,1);
+    const ri = read.indexOf(tomeNum);  if(ri>=0) read.splice(ri,1);
+  }
+  item.ownedTomes = owned;
+  item.readTomes  = read;
+  await saveItemToDb(item);
+  selectItem(itemId);
+}
+
+// ── SELECT SCAN ──
+function selectScan(id) {
+  selectedItemId = id;
+  const s = scanItems.find(x=>x.id===id); if (!s) return;
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('detail-cover-zone').innerHTML = s.image
+    ?`<img class="detail-cover" src="${s.image}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="detail-cover-ph" style="display:none">📡</div>`
+    :`<div class="detail-cover-ph">📡</div>`;
+  const pct = s.totalChapters>0?Math.min(100,Math.round((s.chapter/s.totalChapters)*100)):0;
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-title">${esc(s.title)}</div>
+    <div class="detail-cat">📡 Scans</div>
+    <div class="detail-section">
+      <div class="detail-slabel">Progression chapitres</div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <span style="font-size:32px;font-weight:800;color:var(--accent2)">${s.chapter||0}</span>
+        ${s.totalChapters>0?`<span style="font-size:14px;color:var(--muted)">/ ${s.totalChapters}</span>`:''}
+      </div>
+      ${s.totalChapters>0?`<div class="tome-progress-bar" style="margin-top:10px"><div class="tome-progress-fill" style="width:${pct}%"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px">${pct}% complété</div>`:''}
+    </div>
+    ${s.notes?`<div class="detail-section"><div class="detail-slabel">Notes</div><div class="detail-desc">${esc(s.notes)}</div></div>`:''}
+  `;
+  document.getElementById('detail-actions').innerHTML = `
+    <button class="dbtn dbtn-edit" onclick="openScanModal('${s.id}')">✏ Modifier</button>
+    <button class="dbtn dbtn-del" onclick="deleteScan('${s.id}')">🗑 Supprimer</button>
+  `;
+  renderScanGrid();
+}
+
+// ── SCAN CHAPTER QUICK UPDATE ──
+async function updateScanChapter(id, delta) {
+  const s = scanItems.find(x=>x.id===id); if (!s) return;
+  s.chapter = Math.max(0, (s.chapter||0)+delta);
+  s.updatedAt = Date.now();
+  await saveScanToDb(s);
+  renderScanGrid();
+  if (selectedItemId===id) selectScan(id);
+}
+async function setScanChapterDirect(id, val) {
+  const s = scanItems.find(x=>x.id===id); if (!s) return;
+  s.chapter = Math.max(0, parseInt(val)||0);
+  s.updatedAt = Date.now();
+  await saveScanToDb(s);
+  renderScanGrid();
+  if (selectedItemId===id) selectScan(id);
 }
 
 function closeDetail() {
-  selectedItemId = null;
+  selectedItemId=null;
   document.getElementById('detail-panel').classList.remove('open');
-  renderGrid();
+  renderMain();
 }
-
 function setFilter(f) { activeFilter=f; render(); }
+function handleAddBtn() { if (isScanMode()) openScanModal(); else openItemModal(); }
 
-function render() { renderSidebar(); renderTopbar(); renderStats(); renderGrid(); }
+function render() { renderSidebar(); renderTopbar(); renderStats(); renderMain(); }
 
 // ══════════════════════════════════════════
 //  ITEM MODAL
 // ══════════════════════════════════════════
 function openItemModal(editId) {
   editingItemId = editId||null;
-  const cat = getActiveCat(); if (!cat) return;
-  document.getElementById('modal-ttl').textContent = editId ? "Modifier l'item" : 'Ajouter un item';
+  const cat = getActiveCat(); if (!cat||cat.isScan) return;
+  document.getElementById('modal-ttl').textContent = editId?"Modifier l'item":'Ajouter un item';
   document.getElementById('status-lbl').textContent   = cat.statusLabel;
   document.getElementById('progress-lbl').textContent = cat.progressLabel;
   document.getElementById('f-status').innerHTML = cat.statuses.map(s=>`<option value="${s}">${s}</option>`).join('');
+  document.getElementById('tomes-row').style.display  = cat.hasTomes ? 'block' : 'none';
+  document.getElementById('progress-row').style.display = cat.hasTomes ? 'none' : 'block';
   if (editId) {
     const item = items.find(i=>i.id===editId);
     if (item) {
@@ -715,28 +882,29 @@ function openItemModal(editId) {
       document.getElementById('f-owned').value    = item.owned||'owned';
       document.getElementById('f-status').value   = item.status||cat.statuses[0];
       document.getElementById('f-progress').value = item.progress||'';
+      document.getElementById('f-tomes').value    = item.totalTomes||'';
       document.getElementById('f-image').value    = item.image||'';
       document.getElementById('f-desc').value     = item.desc||'';
       updateCoverPreview();
     }
   } else {
-    ['f-search','f-title','f-progress','f-image','f-desc'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('f-owned').value = 'owned';
-    document.getElementById('cover-prev').innerHTML = '<span style="color:var(--muted2);font-size:12px">Aperçu de la couverture</span>';
+    ['f-search','f-title','f-progress','f-image','f-desc','f-tomes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('f-owned').value='owned';
+    document.getElementById('cover-prev').innerHTML='<span style="color:var(--muted2);font-size:12px">Aperçu</span>';
   }
-  document.getElementById('search-results').className = 'search-results';
+  document.getElementById('search-results').className='search-results';
   document.getElementById('item-modal').classList.add('open');
 }
-
 function closeItemModal() {
   document.getElementById('item-modal').classList.remove('open');
-  document.getElementById('search-results').className = 'search-results';
+  document.getElementById('search-results').className='search-results';
 }
-
 async function saveItem() {
   const title = document.getElementById('f-title').value.trim();
   if (!title) { toast('Le titre est obligatoire','error'); return; }
   const cat = getActiveCat(); if (!cat) return;
+  const totalTomes = parseInt(document.getElementById('f-tomes').value)||0;
+  const existing = editingItemId ? items.find(i=>i.id===editingItemId) : null;
   const item = {
     id: editingItemId||Date.now().toString(),
     catId: activeCatId, title,
@@ -745,7 +913,10 @@ async function saveItem() {
     progress: document.getElementById('f-progress').value.trim(),
     image:    document.getElementById('f-image').value.trim(),
     desc:     document.getElementById('f-desc').value.trim(),
-    createdAt: editingItemId ? (items.find(i=>i.id===editingItemId)?.createdAt||Date.now()) : Date.now(),
+    totalTomes,
+    ownedTomes: existing?.ownedTomes||[],
+    readTomes:  existing?.readTomes||[],
+    createdAt: existing?.createdAt||Date.now(),
     updatedAt: Date.now(),
   };
   if (editingItemId) { const idx=items.findIndex(i=>i.id===editingItemId); if(idx>=0)items[idx]=item; else items.unshift(item); }
@@ -756,7 +927,6 @@ async function saveItem() {
   render();
   toast(editingItemId?'Item mis à jour ✓':'Item ajouté ✓','success');
 }
-
 async function deleteItem(id) {
   if (!confirm('Supprimer cet item ?')) return;
   items = items.filter(i=>i.id!==id);
@@ -766,7 +936,99 @@ async function deleteItem(id) {
 }
 
 // ══════════════════════════════════════════
-//  SEARCH AUTOCOMPLETE
+//  SCAN MODAL
+// ══════════════════════════════════════════
+function openScanModal(editId) {
+  editingScanId = editId||null;
+  document.getElementById('scan-modal-ttl').textContent = editId?"Modifier le suivi":'Ajouter un suivi scan';
+  if (editId) {
+    const s = scanItems.find(x=>x.id===editId);
+    if (s) {
+      document.getElementById('sf-search').value  = '';
+      document.getElementById('sf-title').value   = s.title;
+      document.getElementById('sf-chapter').value = s.chapter||0;
+      document.getElementById('sf-total').value   = s.totalChapters||'';
+      document.getElementById('sf-image').value   = s.image||'';
+      document.getElementById('sf-notes').value   = s.notes||'';
+      updateScanPreview();
+    }
+  } else {
+    ['sf-search','sf-title','sf-chapter','sf-total','sf-image','sf-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('scan-cover-prev').innerHTML='<span style="color:var(--muted2);font-size:12px">Aperçu</span>';
+  }
+  document.getElementById('scan-search-results').className='search-results';
+  document.getElementById('scan-modal').classList.add('open');
+}
+function closeScanModal() {
+  document.getElementById('scan-modal').classList.remove('open');
+  document.getElementById('scan-search-results').className='search-results';
+}
+async function saveScan() {
+  const title = document.getElementById('sf-title').value.trim();
+  if (!title) { toast('Le titre est obligatoire','error'); return; }
+  const s = {
+    id: editingScanId||Date.now().toString(),
+    title,
+    chapter:       parseInt(document.getElementById('sf-chapter').value)||0,
+    totalChapters: parseInt(document.getElementById('sf-total').value)||0,
+    image:         document.getElementById('sf-image').value.trim(),
+    notes:         document.getElementById('sf-notes').value.trim(),
+    updatedAt: Date.now(),
+    createdAt: editingScanId?(scanItems.find(x=>x.id===editingScanId)?.createdAt||Date.now()):Date.now(),
+  };
+  if (editingScanId) { const idx=scanItems.findIndex(x=>x.id===editingScanId); if(idx>=0)scanItems[idx]=s; else scanItems.unshift(s); }
+  else scanItems.unshift(s);
+  await saveScanToDb(s);
+  closeScanModal();
+  if (selectedItemId===s.id) selectScan(s.id);
+  render();
+  toast(editingScanId?'Suivi mis à jour ✓':'Suivi ajouté ✓','success');
+}
+async function deleteScan(id) {
+  if (!confirm('Supprimer ce suivi ?')) return;
+  scanItems = scanItems.filter(x=>x.id!==id);
+  await deleteScanFromDb(id);
+  closeDetail(); render();
+  toast('Suivi supprimé','success');
+}
+function updateScanPreview() {
+  const url  = document.getElementById('sf-image').value;
+  const prev = document.getElementById('scan-cover-prev');
+  if (url) prev.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<span style=color:var(--danger);font-size:12px>URL invalide</span>'">`;
+  else prev.innerHTML='<span style="color:var(--muted2);font-size:12px">Aperçu</span>';
+}
+
+// Search dans scan modal
+function onScanSearchInput() {
+  clearTimeout(scanSearchTimer);
+  const q   = document.getElementById('sf-search').value.trim();
+  const res = document.getElementById('scan-search-results');
+  if (!q||q.length<2) { res.className='search-results'; return; }
+  res.className='search-results visible';
+  res.innerHTML='<div class="searching-msg">Recherche en cours…</div>';
+  scanSearchTimer = setTimeout(async()=>{
+    const results = await searchManga(q);
+    if (!results.length) { res.innerHTML='<div class="searching-msg">Aucun résultat.</div>'; return; }
+    res.innerHTML = results.map((r,i)=>`
+      <div class="search-result-item" onclick="pickScanResult(${i})">
+        ${r.cover?`<img class="sri-cover" src="${r.cover}" onerror="this.style.display='none'">`:('<div class="sri-cover-ph">📡</div>')}
+        <div><div class="sri-title">${esc(r.title)}</div><div class="sri-meta">${r.chapters?r.chapters+' chap.':''} ${esc(r.meta||'')}</div></div>
+      </div>`).join('');
+    res._results = results;
+  },500);
+}
+function pickScanResult(i) {
+  const res = document.getElementById('scan-search-results');
+  const r   = res._results?.[i]; if (!r) return;
+  document.getElementById('sf-title').value = r.title||'';
+  if (r.chapters) document.getElementById('sf-total').value = r.chapters;
+  if (r.cover) { document.getElementById('sf-image').value=r.cover; updateScanPreview(); }
+  res.className='search-results';
+  document.getElementById('sf-search').value='';
+}
+
+// ══════════════════════════════════════════
+//  ITEM SEARCH AUTOCOMPLETE
 // ══════════════════════════════════════════
 function onSearchInput() {
   clearTimeout(searchTimer);
@@ -774,34 +1036,37 @@ function onSearchInput() {
   const cat = getActiveCat();
   const res = document.getElementById('search-results');
   if (!q||q.length<2||!cat) { res.className='search-results'; return; }
-  res.className = 'search-results visible';
-  res.innerHTML = '<div class="searching-msg">Recherche en cours…</div>';
-  searchTimer = setTimeout(async () => {
+  res.className='search-results visible';
+  res.innerHTML='<div class="searching-msg">Recherche en cours…</div>';
+  searchTimer = setTimeout(async()=>{
     const results = await searchCovers(q, cat.api||'none');
-    if (!results.length) { res.innerHTML='<div class="searching-msg">Aucun résultat. Colle une URL d\'image manuellement.</div>'; return; }
+    if (!results.length) { res.innerHTML='<div class="searching-msg">Aucun résultat. Colle une URL manuellement.</div>'; return; }
     res.innerHTML = results.map((r,i)=>`
       <div class="search-result-item" onclick="pickResult(${i})">
         ${r.cover?`<img class="sri-cover" src="${r.cover}" onerror="this.style.display='none'">`:(`<div class="sri-cover-ph">${cat.icon}</div>`)}
-        <div><div class="sri-title">${esc(r.title)}</div><div class="sri-meta">${esc(r.meta||'')}</div></div>
+        <div>
+          <div class="sri-title">${esc(r.title)}</div>
+          <div class="sri-meta">${r.volumes?'📚 '+r.volumes+' tomes · ':''} ${esc(r.meta||'')}</div>
+        </div>
       </div>`).join('');
     res._results = results;
-  }, 500);
+  },500);
 }
-
 function pickResult(i) {
   const res = document.getElementById('search-results');
   const r   = res._results?.[i]; if (!r) return;
+  const cat = getActiveCat();
   document.getElementById('f-title').value = r.title||'';
-  if (r.cover) { document.getElementById('f-image').value = r.cover; updateCoverPreview(); }
-  res.className = 'search-results';
-  document.getElementById('f-search').value = '';
+  if (r.cover) { document.getElementById('f-image').value=r.cover; updateCoverPreview(); }
+  if (cat?.hasTomes && r.volumes>0) document.getElementById('f-tomes').value = r.volumes;
+  res.className='search-results';
+  document.getElementById('f-search').value='';
 }
-
 function updateCoverPreview() {
   const url  = document.getElementById('f-image').value;
   const prev = document.getElementById('cover-prev');
   if (url) prev.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<span style=color:var(--danger);font-size:12px>URL invalide</span>'">`;
-  else prev.innerHTML='<span style="color:var(--muted2);font-size:12px">Aperçu de la couverture</span>';
+  else prev.innerHTML='<span style="color:var(--muted2);font-size:12px">Aperçu</span>';
 }
 
 // ══════════════════════════════════════════
@@ -812,7 +1077,6 @@ function closeCatModal() {
   document.getElementById('cat-modal').classList.remove('open');
   ['cat-name','cat-icon','cat-status','cat-progress'].forEach(id=>document.getElementById(id).value='');
 }
-
 async function saveCat() {
   const name = document.getElementById('cat-name').value.trim();
   if (!name) { toast('Le nom est obligatoire','error'); return; }
@@ -820,9 +1084,9 @@ async function saveCat() {
   const statusLabel   = document.getElementById('cat-status').value.trim()||'Terminé';
   const progressLabel = document.getElementById('cat-progress').value.trim()||'Progression';
   const api           = document.getElementById('cat-api').value;
-  const cat = { id:'cat_'+Date.now(), name, icon, statusLabel, progressLabel, api, statuses:[statusLabel,'En cours','Non '+statusLabel.toLowerCase(),'Abandonné'], order:categories.length };
-  categories.push(cat);
-  activeCatId = cat.id;
+  const hasTomes      = api==='manga';
+  const cat = { id:'cat_'+Date.now(), name, icon, statusLabel, progressLabel, api, hasTomes, statuses:[statusLabel,'En cours','Non '+statusLabel.toLowerCase(),'Abandonné'], order:categories.length };
+  categories.push(cat); activeCatId=cat.id;
   await saveCatToDb(cat);
   closeCatModal(); render();
   toast('Catégorie créée ✓','success');
@@ -831,11 +1095,8 @@ async function saveCat() {
 // ══════════════════════════════════════════
 //  UTILS
 // ══════════════════════════════════════════
-function esc(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function toast(msg, type='success') {
+function esc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(msg,type='success') {
   const c=document.getElementById('toast-container');
   const t=document.createElement('div');
   t.className=`toast ${type}`; t.textContent=msg;
@@ -844,10 +1105,9 @@ function toast(msg, type='success') {
 
 document.getElementById('item-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeItemModal();});
 document.getElementById('cat-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCatModal();});
-
-// Entrée clavier sur la page de connexion
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && document.getElementById('auth-screen').style.display !== 'none') handleAuth();
+document.getElementById('scan-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeScanModal();});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('auth-screen').style.display!=='none') handleAuth();
 });
 
 init();
