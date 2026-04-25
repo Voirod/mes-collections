@@ -57,6 +57,11 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .sidebar-footer{padding:10px 8px;border-top:1px solid var(--border);}
 .add-cat-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);background:none;border:1px dashed var(--border2);width:100%;transition:all .15s;}
 .add-cat-btn:hover{color:var(--accent2);border-color:var(--accent);}
+.nav-item-wrap{display:flex;align-items:center;gap:3px;margin-bottom:2px;}
+.nav-item-wrap .nav-item{margin-bottom:0;flex:1;}
+.nav-del-btn{flex-shrink:0;width:24px;height:24px;border-radius:6px;border:none;background:none;color:var(--muted2);font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .15s;padding:0;}
+.nav-item-wrap:hover .nav-del-btn{display:flex;}
+.nav-del-btn:hover{background:rgba(248,113,113,.15);color:var(--danger);}
 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
@@ -365,27 +370,63 @@ select.finput{appearance:none;cursor:pointer;}
   <div class="modal">
     <div class="modal-hdr"><div class="modal-ttl">Nouvelle catégorie</div><button class="modal-x" onclick="closeCatModal()">✕</button></div>
     <div class="modal-body">
+      <div class="frow">
+        <label class="flabel">Démarrage rapide</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" onclick="fillPreset('manga')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📚 Mangas / BD</button>
+          <button type="button" onclick="fillPreset('book')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📖 Livres</button>
+          <button type="button" onclick="fillPreset('scan')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">📡 Scan Manga</button>
+          <button type="button" onclick="fillPreset('game')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">🎮 Jeux vidéo</button>
+          <button type="button" onclick="fillPreset('film')" style="padding:7px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)'">🎬 Films / Séries</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted2);margin-top:6px">Clique pour pré-remplir, ou configure manuellement ci-dessous.</div>
+      </div>
       <div class="frow"><label class="flabel">Nom *</label><input class="finput" id="cat-name" placeholder="Ex: Figurines…"></div>
       <div class="frow2">
         <div><label class="flabel">Icône (emoji)</label><input class="finput" id="cat-icon" placeholder="🎸" maxlength="2"></div>
         <div><label class="flabel">Type de recherche</label>
           <select class="finput" id="cat-api">
+            <option value="manga">Mangas (grille de tomes)</option>
+            <option value="book">Livres (grille de tomes)</option>
             <option value="game">Jeux vidéo</option>
-            <option value="manga">Mangas</option>
-            <option value="book">Livres</option>
             <option value="tmdb">Films / Séries</option>
+            <option value="scan">Scan / Chapitres</option>
             <option value="none">Aucune</option>
           </select>
         </div>
       </div>
-      <div class="frow"><label class="flabel">Label activité</label><input class="finput" id="cat-status" placeholder="Ex: Joué"></div>
-      <div class="frow"><label class="flabel">Label progression</label><input class="finput" id="cat-progress" placeholder="Ex: Heures de jeu"></div>
+      <div class="frow"><label class="flabel">Label activité</label><input class="finput" id="cat-status" placeholder="Ex: Lu, Joué, Regardé…"></div>
+      <div class="frow"><label class="flabel">Label progression</label><input class="finput" id="cat-progress" placeholder="Ex: Tome, Page, Heures…"></div>
     </div>
     <div class="modal-ftr"><button class="btn-cancel" onclick="closeCatModal()">Annuler</button><button class="btn-save" onclick="saveCat()">Créer</button></div>
   </div>
 </div>
 
 <div id="toast-container"></div>
+
+<!-- FIRESTORE RULES HELPER -->
+<div id="firestore-helper" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#18181f;border:1px solid rgba(248,113,113,.4);border-radius:14px;max-width:560px;width:100%;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.7)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <span style="font-size:24px">⚠️</span>
+      <div style="font-size:16px;font-weight:700;color:#f87171">Erreur Firestore</div>
+    </div>
+    <p style="font-size:13px;color:#8b8a9e;line-height:1.6;margin-bottom:16px">
+      Firestore refuse les requêtes. Il faut configurer les règles de sécurité.<br>
+      Va sur <strong style="color:#e8e6f0">console.firebase.google.com</strong> → ton projet → <strong style="color:#e8e6f0">Firestore → Règles</strong> et colle :
+    </p>
+    <div style="background:#0f0f13;border-radius:8px;padding:14px;font-family:monospace;font-size:12px;color:#a78bfa;margin-bottom:16px;white-space:pre-wrap">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}</div>
+    <p style="font-size:11px;color:#5e5d70;margin-bottom:18px">⚠️ Ces règles sont ouvertes pour le développement. En production, utilise une vraie authentification Firebase.</p>
+    <button onclick="document.getElementById('firestore-helper').style.display='none'" style="padding:9px 20px;border-radius:8px;background:#7c6bfa;border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Compris, fermer</button>
+  </div>
+</div>
 
 <script>
 // ══════════════════════════════════════════
@@ -436,11 +477,7 @@ let isRegister  = false;
 
 const CAT_SCAN_ID = '__scan__';
 
-const DEFAULT_CATS = [
-  { id:'manga', name:'Mangas / BD',   icon:'📚', statusLabel:'Lu',      progressLabel:'Tome / Chapitre', api:'manga', hasTomes:true,  statuses:['Lu','En cours','Non lu','Abandonné'] },
-  { id:'books', name:'Livres',        icon:'📖', statusLabel:'Lu',      progressLabel:'Page',            api:'book',  hasTomes:true,  statuses:['Lu','En cours','Non lu','Abandonné'] },
-  { id:CAT_SCAN_ID, name:'Scan Manga',icon:'📡', statusLabel:'',        progressLabel:'Chapitre',        api:'manga', hasTomes:false, statuses:[], isScan:true },
-];
+const DEFAULT_CATS = []; // Aucune catégorie par défaut — l'utilisateur crée les siennes
 
 // ══════════════════════════════════════════
 //  AUTH
@@ -519,38 +556,22 @@ async function loadUserData() {
   const uid = currentUser.uid;
   try {
     const catSnap = await db.collection('users').doc(uid).collection('categories').get();
-    if (catSnap.empty) {
-      categories = DEFAULT_CATS.map(c=>({...c}));
-      for (let i=0;i<categories.length;i++)
-        await db.collection('users').doc(uid).collection('categories').doc(categories[i].id).set({...categories[i],order:i});
-    } else {
-      categories = catSnap.docs.map(d=>({id:d.id,...d.data()}));
-      categories.sort((a,b)=>(a.order||0)-(b.order||0));
-      // Ensure all default categories exist (manga, books, scan)
-      for (const defCat of DEFAULT_CATS) {
-        if (!categories.find(c=>c.id===defCat.id)) {
-          const newCat = {...defCat, order:categories.length};
-          await db.collection('users').doc(uid).collection('categories').doc(defCat.id).set(newCat);
-          categories.push(newCat);
-        }
-      }
-      // Migrate books to hasTomes if needed
-      const booksCat = categories.find(c=>c.id==='books');
-      if (booksCat && !booksCat.hasTomes) {
-        booksCat.hasTomes = true;
-        await db.collection('users').doc(uid).collection('categories').doc('books').set(booksCat);
-      }
-    }
+    categories = catSnap.docs.map(d=>({id:d.id,...d.data()}));
+    categories.sort((a,b)=>(a.order||0)-(b.order||0));
+
     const itemSnap = await db.collection('users').doc(uid).collection('items').get();
     items = itemSnap.docs.map(d=>({id:d.id,...d.data()}));
     items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+
     const scanSnap = await db.collection('users').doc(uid).collection('scans').get();
     scanItems = scanSnap.docs.map(d=>({id:d.id,...d.data()}));
     scanItems.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+
     activeCatId = categories[0]?.id || null;
   } catch(e) {
     console.error('Erreur chargement:', e);
-    toast('Erreur Firestore : ouvre la console pour voir le détail. Vérifie les règles Firestore (allow read, write: if true).','error');
+    document.getElementById('firestore-helper').style.display='flex';
+    toast('Erreur Firestore — voir le panneau d\'aide','error');
   }
   document.getElementById('loading').style.display='none';
 }
@@ -568,6 +589,32 @@ async function deleteScanFromDb(id) {
 }
 async function saveCatToDb(cat) {
   await db.collection('users').doc(currentUser.uid).collection('categories').doc(cat.id).set(cat);
+}
+async function deleteCatFromDb(id) {
+  await db.collection('users').doc(currentUser.uid).collection('categories').doc(id).delete();
+}
+async function deleteCat(catId) {
+  const cat = categories.find(c=>c.id===catId); if (!cat) return;
+  const count = cat.isScan ? scanItems.length : items.filter(i=>i.catId===catId).length;
+  const msg = count > 0
+    ? `Supprimer "${cat.name}" et ses ${count} item${count>1?'s':''} ? Cette action est irréversible.`
+    : `Supprimer la catégorie "${cat.name}" ?`;
+  if (!confirm(msg)) return;
+  // Delete all items in this category from Firestore
+  if (cat.isScan) {
+    for (const s of scanItems) await deleteScanFromDb(s.id).catch(()=>{});
+    scanItems = [];
+  } else {
+    const toDelete = items.filter(i=>i.catId===catId);
+    for (const item of toDelete) await deleteItemFromDb(item.id).catch(()=>{});
+    items = items.filter(i=>i.catId!==catId);
+  }
+  await deleteCatFromDb(catId);
+  categories = categories.filter(c=>c.id!==catId);
+  if (activeCatId===catId) activeCatId = categories[0]?.id || null;
+  closeDetail();
+  render();
+  toast(`"${cat.name}" supprimée`, 'success');
 }
 
 // ══════════════════════════════════════════
@@ -623,16 +670,29 @@ function renderSidebar() {
   nav.innerHTML = '<div class="nav-label">Catégories</div>';
   categories.forEach(cat => {
     const count = cat.isScan ? scanItems.length : items.filter(i=>i.catId===cat.id).length;
-    const btn = document.createElement('button');
-    btn.className = 'nav-item'+(cat.id===activeCatId?' active':'');
-    btn.innerHTML = `<span class="nav-icon">${cat.icon}</span><span class="nav-lbl">${cat.name}</span><span class="nav-count">${count}</span>`;
-    btn.onclick = ()=>{ activeCatId=cat.id; activeFilter='all'; closeDetail(); render(); };
-    nav.appendChild(btn);
+    const wrap = document.createElement('div');
+    wrap.className = 'nav-item-wrap';
+    wrap.innerHTML = `
+      <button class="nav-item${cat.id===activeCatId?' active':''}" onclick="activeCatId='${cat.id}';activeFilter='all';closeDetail();render()">
+        <span class="nav-icon">${cat.icon}</span>
+        <span class="nav-lbl">${cat.name}</span>
+        <span class="nav-count">${count}</span>
+      </button>
+      <button class="nav-del-btn" onclick="deleteCat('${cat.id}')" title="Supprimer la catégorie">✕</button>`;
+    nav.appendChild(wrap);
   });
 }
 
 function renderTopbar() {
-  const cat = getActiveCat(); if (!cat) return;
+  const cat = getActiveCat();
+  if (!cat) {
+    document.getElementById('topbar-title').textContent = 'Ma collection';
+    document.getElementById('topbar-sub').textContent = '';
+    document.getElementById('filter-tabs').innerHTML = '';
+    document.getElementById('main-add-btn').style.display = 'none';
+    return;
+  }
+  document.getElementById('main-add-btn').style.display = '';
   document.getElementById('topbar-title').textContent = cat.name;
   if (cat.isScan) {
     document.getElementById('topbar-sub').textContent = `${scanItems.length} manga${scanItems.length!==1?'s':''} suivis`;
@@ -663,7 +723,19 @@ function renderStats() {
 
 function renderMain() {
   if (isScanMode()) { renderScanGrid(); return; }
-  const cat = getActiveCat(); if (!cat) return;
+  const cat = getActiveCat();
+  if (!cat) {
+    // No categories yet — show welcome screen
+    document.getElementById('stats-row').innerHTML='';
+    document.getElementById('items-grid').innerHTML=`
+      <div class="empty" style="grid-column:1/-1;padding:80px 20px">
+        <div class="eicon">📦</div>
+        <h3>Bienvenue sur Collecto !</h3>
+        <p style="margin-top:8px">Crée ta première catégorie avec le bouton ci-dessous.</p>
+        <button onclick="openCatModal()" style="margin-top:18px;padding:10px 22px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer">＋ Créer une catégorie</button>
+      </div>`;
+    return;
+  }
   const q = (document.getElementById('search-input')?.value||'').toLowerCase();
   const grid = document.getElementById('items-grid');
   let its = items.filter(i=>i.catId===cat.id);
@@ -1116,6 +1188,21 @@ function updateCoverPreview() {
 // ══════════════════════════════════════════
 //  CATEGORY MODAL
 // ══════════════════════════════════════════
+const PRESETS = {
+  manga: { name:'Mangas / BD',    icon:'📚', api:'manga', status:'Lu',      progress:'Tome / Chapitre' },
+  book:  { name:'Livres',         icon:'📖', api:'book',  status:'Lu',      progress:'Page'            },
+  scan:  { name:'Scan Manga',     icon:'📡', api:'scan',  status:'',        progress:'Chapitre'        },
+  game:  { name:'Jeux vidéo',     icon:'🎮', api:'game',  status:'Joué',    progress:'Heures de jeu'   },
+  film:  { name:'Films / Séries', icon:'🎬', api:'tmdb',  status:'Regardé', progress:'Saison/Épisode'  },
+};
+function fillPreset(type) {
+  const p = PRESETS[type]; if (!p) return;
+  document.getElementById('cat-name').value     = p.name;
+  document.getElementById('cat-icon').value     = p.icon;
+  document.getElementById('cat-api').value      = p.api;
+  document.getElementById('cat-status').value   = p.status;
+  document.getElementById('cat-progress').value = p.progress;
+}
 function openCatModal()  { document.getElementById('cat-modal').classList.add('open'); }
 function closeCatModal() {
   document.getElementById('cat-modal').classList.remove('open');
@@ -1128,8 +1215,10 @@ async function saveCat() {
   const statusLabel   = document.getElementById('cat-status').value.trim()||'Terminé';
   const progressLabel = document.getElementById('cat-progress').value.trim()||'Progression';
   const api           = document.getElementById('cat-api').value;
-  const hasTomes      = api==='manga' || api==='book';
-  const cat = { id:'cat_'+Date.now(), name, icon, statusLabel, progressLabel, api, hasTomes, statuses:[statusLabel,'En cours','Non '+statusLabel.toLowerCase(),'Abandonné'], order:categories.length };
+  const isScan        = api==='scan';
+  const hasTomes      = !isScan && (api==='manga' || api==='book');
+  const statuses      = isScan ? [] : [statusLabel,'En cours','Non '+statusLabel.toLowerCase(),'Abandonné'];
+  const cat = { id:'cat_'+Date.now(), name, icon, statusLabel, progressLabel, api, hasTomes, isScan, statuses, order:categories.length, _custom:true };
   categories.push(cat); activeCatId=cat.id;
   await saveCatToDb(cat);
   closeCatModal(); render();
