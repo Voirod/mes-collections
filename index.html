@@ -508,29 +508,33 @@ async function init() {
 async function loadUserData() {
   document.getElementById('loading').style.display='flex';
   const uid = currentUser.uid;
-  // Categories
-  const catSnap = await db.collection('users').doc(uid).collection('categories').orderBy('order').get();
-  if (catSnap.empty) {
-    categories = DEFAULT_CATS;
-    for (let i=0;i<categories.length;i++)
-      await db.collection('users').doc(uid).collection('categories').doc(categories[i].id).set({...categories[i],order:i});
-  } else {
-    categories = catSnap.docs.map(d=>({id:d.id,...d.data()}));
-    // Ajouter Scans si absent
-    if (!categories.find(c=>c.id===CAT_SCAN_ID)) {
-      const scanCat = DEFAULT_CATS.find(c=>c.id===CAT_SCAN_ID);
-      scanCat.order = categories.length;
-      await db.collection('users').doc(uid).collection('categories').doc(CAT_SCAN_ID).set(scanCat);
-      categories.push(scanCat);
+  try {
+    const catSnap = await db.collection('users').doc(uid).collection('categories').get();
+    if (catSnap.empty) {
+      categories = DEFAULT_CATS.map(c=>({...c}));
+      for (let i=0;i<categories.length;i++)
+        await db.collection('users').doc(uid).collection('categories').doc(categories[i].id).set({...categories[i],order:i});
+    } else {
+      categories = catSnap.docs.map(d=>({id:d.id,...d.data()}));
+      categories.sort((a,b)=>(a.order||0)-(b.order||0));
+      if (!categories.find(c=>c.id===CAT_SCAN_ID)) {
+        const scanCat = {...DEFAULT_CATS.find(c=>c.id===CAT_SCAN_ID)};
+        scanCat.order = categories.length;
+        await db.collection('users').doc(uid).collection('categories').doc(CAT_SCAN_ID).set(scanCat);
+        categories.push(scanCat);
+      }
     }
+    const itemSnap = await db.collection('users').doc(uid).collection('items').get();
+    items = itemSnap.docs.map(d=>({id:d.id,...d.data()}));
+    items.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    const scanSnap = await db.collection('users').doc(uid).collection('scans').get();
+    scanItems = scanSnap.docs.map(d=>({id:d.id,...d.data()}));
+    scanItems.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+    activeCatId = categories[0]?.id || null;
+  } catch(e) {
+    console.error('Erreur chargement:', e);
+    toast('Erreur de chargement. Vérifie les règles Firestore.','error');
   }
-  // Items
-  const itemSnap = await db.collection('users').doc(uid).collection('items').orderBy('createdAt','desc').get();
-  items = itemSnap.docs.map(d=>({id:d.id,...d.data()}));
-  // Scan items
-  const scanSnap = await db.collection('users').doc(uid).collection('scans').orderBy('updatedAt','desc').get();
-  scanItems = scanSnap.docs.map(d=>({id:d.id,...d.data()}));
-  activeCatId = categories[0]?.id || null;
   document.getElementById('loading').style.display='none';
 }
 async function saveItemToDb(item) {
