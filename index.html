@@ -4,378 +4,244 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Collecto — Ma Collection</title>
-
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #0f0f13;
-    --surface: #18181f;
-    --surface2: #1e1e28;
-    --surface3: #25252f;
-    --accent: #7c6bfa;
-    --accent2: #a78bfa;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --text: #e8e6f0;
-    --muted: #8b8a9e;
-    --muted2: #5e5d70;
-    --success: #34d399;
-    --warning: #fbbf24;
-    --danger: #f87171;
-    --info: #60a5fa;
-    --radius: 10px;
-    --radius-lg: 14px;
+    --bg: #0f0f13; --surface: #18181f; --surface2: #1e1e28; --surface3: #25252f;
+    --accent: #7c6bfa; --accent2: #a78bfa; --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14); --text: #e8e6f0; --muted: #8b8a9e;
+    --muted2: #5e5d70; --success: #34d399; --warning: #fbbf24;
+    --danger: #f87171; --radius: 10px; --radius-lg: 14px;
   }
   html, body { height: 100%; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
 
-  /* ── AUTH SCREEN ── */
-  #auth-screen {
-    display: flex; align-items: center; justify-content: center;
-    height: 100vh; background: var(--bg);
-  }
+  /* AUTH */
+  #auth-screen { display:flex; align-items:center; justify-content:center; height:100vh; }
   .auth-card {
-    background: var(--surface); border: 1px solid var(--border2);
-    border-radius: var(--radius-lg); padding: 40px 36px; width: 360px; text-align: center;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius-lg);
+    padding:40px 36px; width:360px; text-align:center; box-shadow:0 24px 64px rgba(0,0,0,0.5);
   }
-  .auth-logo { font-size: 36px; margin-bottom: 8px; }
-  .auth-title { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-  .auth-sub { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+  .auth-logo { font-size:40px; margin-bottom:10px; }
+  .auth-title { font-size:22px; font-weight:700; margin-bottom:6px; }
+  .auth-sub { font-size:13px; color:var(--muted); margin-bottom:26px; line-height:1.5; }
   .auth-input {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
-    border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 14px;
-    outline: none; margin-bottom: 10px; transition: border-color 0.15s;
+    width:100%; background:var(--surface2); border:1px solid var(--border2);
+    border-radius:8px; padding:10px 14px; color:var(--text); font-size:14px;
+    outline:none; margin-bottom:10px; transition:border-color 0.15s; display:block;
   }
-  .auth-input:focus { border-color: var(--accent); }
-  .auth-input::placeholder { color: var(--muted2); }
-  .btn-google {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: 100%; padding: 11px; border-radius: 8px;
-    background: #fff; color: #1a1a1a; font-size: 14px; font-weight: 500;
-    border: none; cursor: pointer; transition: opacity 0.15s; margin-bottom: 16px;
-  }
-  .btn-google:hover { opacity: 0.92; }
-  .btn-google svg { width: 18px; height: 18px; flex-shrink: 0; }
-  .auth-divider { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: var(--muted2); font-size: 12px; }
-  .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .auth-input:focus { border-color:var(--accent); }
+  .auth-input::placeholder { color:var(--muted2); }
   .btn-primary {
-    width: 100%; padding: 11px; border-radius: 8px;
-    background: var(--accent); color: #fff; font-size: 14px; font-weight: 600;
-    border: none; cursor: pointer; transition: all 0.15s; margin-bottom: 10px;
+    width:100%; padding:11px; border-radius:8px; background:var(--accent); color:#fff;
+    font-size:14px; font-weight:600; border:none; cursor:pointer; transition:all 0.15s; margin-bottom:10px;
   }
-  .btn-primary:hover { background: var(--accent2); }
-  .auth-toggle { font-size: 12px; color: var(--muted); margin-top: 14px; }
-  .auth-toggle a { color: var(--accent2); cursor: pointer; text-decoration: none; }
-  .auth-toggle a:hover { text-decoration: underline; }
-  .auth-error { font-size: 12px; color: var(--danger); margin-top: 8px; min-height: 16px; }
+  .btn-primary:hover { background:var(--accent2); }
+  .auth-toggle { font-size:12px; color:var(--muted); margin-top:14px; }
+  .auth-toggle a { color:var(--accent2); cursor:pointer; }
+  .auth-toggle a:hover { text-decoration:underline; }
+  .auth-error { font-size:12px; color:var(--danger); margin-top:6px; min-height:18px; }
 
-  /* ── APP LAYOUT ── */
-  #app-screen { display: none; height: 100vh; }
-  .app { display: flex; height: 100%; overflow: hidden; }
+  /* APP */
+  #app-screen { display:none; height:100vh; }
+  .app { display:flex; height:100%; overflow:hidden; }
 
   /* SIDEBAR */
-  .sidebar {
-    width: 230px; background: var(--surface); border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.2s;
-  }
-  .sidebar-logo { padding: 18px 16px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-  .logo-icon { font-size: 22px; }
-  .logo-text { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
-  .logo-sub { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 1px; }
-  .user-pill {
-    margin: 10px 10px 0; padding: 8px 10px; border-radius: 8px;
-    background: var(--surface2); display: flex; align-items: center; gap: 8px; cursor: pointer;
-    border: 1px solid var(--border); transition: all 0.15s;
-  }
-  .user-pill:hover { border-color: var(--border2); }
-  .user-avatar {
-    width: 28px; height: 28px; border-radius: 50%; background: var(--accent);
-    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex-shrink: 0; overflow: hidden;
-  }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .user-name { font-size: 12px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .user-logout { font-size: 11px; color: var(--muted); cursor: pointer; flex-shrink: 0; padding: 2px 4px; border-radius: 4px; }
-  .user-logout:hover { color: var(--danger); }
-  .sidebar-nav { flex: 1; padding: 12px 8px; overflow-y: auto; }
-  .nav-label { font-size: 10px; font-weight: 600; color: var(--muted2); text-transform: uppercase; letter-spacing: 1px; padding: 8px 8px 4px; }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px; padding: 9px 10px;
-    border-radius: 8px; cursor: pointer; font-size: 13.5px; color: var(--muted);
-    margin-bottom: 2px; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left;
-  }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: rgba(124,107,250,0.15); color: var(--accent2); }
-  .nav-icon { font-size: 16px; flex-shrink: 0; width: 20px; text-align: center; }
-  .nav-count { margin-left: auto; font-size: 11px; background: var(--surface3); color: var(--muted); padding: 1px 7px; border-radius: 20px; }
-  .sidebar-footer { padding: 10px 8px; border-top: 1px solid var(--border); }
-  .add-cat-btn {
-    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-    border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--muted);
-    background: none; border: 1px dashed var(--border2); width: 100%; transition: all 0.15s;
-  }
-  .add-cat-btn:hover { color: var(--accent2); border-color: var(--accent); }
+  .sidebar { width:230px; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0; }
+  .sidebar-logo { padding:18px 16px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  .logo-icon { font-size:22px; }
+  .logo-text { font-size:16px; font-weight:700; }
+  .logo-sub { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-top:1px; }
+  .user-pill { margin:10px 10px 0; padding:8px 10px; border-radius:8px; background:var(--surface2); display:flex; align-items:center; gap:8px; border:1px solid var(--border); }
+  .user-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; color:#fff; }
+  .user-name { font-size:12px; font-weight:500; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .user-logout { font-size:13px; color:var(--muted); cursor:pointer; padding:2px 4px; border-radius:4px; flex-shrink:0; }
+  .user-logout:hover { color:var(--danger); }
+  .sidebar-nav { flex:1; padding:12px 8px; overflow-y:auto; }
+  .nav-label { font-size:10px; font-weight:600; color:var(--muted2); text-transform:uppercase; letter-spacing:1px; padding:8px 8px 4px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer; font-size:13.5px; color:var(--muted); margin-bottom:2px; transition:all 0.15s; border:none; background:none; width:100%; text-align:left; }
+  .nav-item:hover { background:var(--surface2); color:var(--text); }
+  .nav-item.active { background:rgba(124,107,250,0.15); color:var(--accent2); }
+  .nav-icon { font-size:16px; flex-shrink:0; width:20px; text-align:center; }
+  .nav-count { margin-left:auto; font-size:11px; background:var(--surface3); color:var(--muted); padding:1px 7px; border-radius:20px; }
+  .sidebar-footer { padding:10px 8px; border-top:1px solid var(--border); }
+  .add-cat-btn { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; cursor:pointer; font-size:13px; color:var(--muted); background:none; border:1px dashed var(--border2); width:100%; transition:all 0.15s; }
+  .add-cat-btn:hover { color:var(--accent2); border-color:var(--accent); }
 
   /* MAIN */
-  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-  .topbar {
-    padding: 14px 22px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 12px; background: var(--bg); flex-wrap: wrap;
-  }
-  .topbar-info { flex: 1; min-width: 120px; }
-  .topbar-title { font-size: 18px; font-weight: 700; }
-  .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
-  .search-box {
-    display: flex; align-items: center; gap: 8px; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; min-width: 180px;
-  }
-  .search-box input { background: none; border: none; outline: none; color: var(--text); font-size: 13px; width: 160px; }
-  .search-box input::placeholder { color: var(--muted2); }
-  .filter-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
-  .ftab {
-    padding: 5px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
-    border: none; background: var(--surface); color: var(--muted); transition: all 0.15s;
-  }
-  .ftab.active { background: rgba(124,107,250,0.2); color: var(--accent2); }
-  .ftab:hover:not(.active) { background: var(--surface2); color: var(--text); }
-  .add-btn {
-    display: flex; align-items: center; gap: 6px; padding: 8px 16px;
-    border-radius: 8px; background: var(--accent); color: #fff; font-size: 13px;
-    font-weight: 600; border: none; cursor: pointer; transition: all 0.15s; flex-shrink: 0;
-  }
-  .add-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+  .main { flex:1; display:flex; flex-direction:column; overflow:hidden; min-width:0; }
+  .topbar { padding:14px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; background:var(--bg); flex-wrap:wrap; }
+  .topbar-info { flex:1; min-width:120px; }
+  .topbar-title { font-size:18px; font-weight:700; }
+  .topbar-sub { font-size:12px; color:var(--muted); margin-top:1px; }
+  .search-box { display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:7px 12px; }
+  .search-box input { background:none; border:none; outline:none; color:var(--text); font-size:13px; width:160px; }
+  .search-box input::placeholder { color:var(--muted2); }
+  .filter-tabs { display:flex; gap:4px; flex-wrap:wrap; }
+  .ftab { padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer; border:none; background:var(--surface); color:var(--muted); transition:all 0.15s; }
+  .ftab.active { background:rgba(124,107,250,0.2); color:var(--accent2); }
+  .ftab:hover:not(.active) { background:var(--surface2); color:var(--text); }
+  .add-btn { display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:8px; background:var(--accent); color:#fff; font-size:13px; font-weight:600; border:none; cursor:pointer; transition:all 0.15s; flex-shrink:0; }
+  .add-btn:hover { background:var(--accent2); transform:translateY(-1px); }
 
-  .content { flex: 1; overflow-y: auto; padding: 18px 22px; }
-  .stats-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; flex: 1; min-width: 90px; }
-  .stat-val { font-size: 22px; font-weight: 700; }
-  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .stat-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
+  .content { flex:1; overflow-y:auto; padding:18px 22px; }
+  .stats-row { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:12px 16px; flex:1; min-width:80px; }
+  .stat-val { font-size:22px; font-weight:700; }
+  .stat-lbl { font-size:11px; color:var(--muted); margin-top:2px; }
+  .stat-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:4px; }
 
   /* GRID */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
-  .item-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
-    overflow: hidden; cursor: pointer; transition: all 0.2s; position: relative;
-  }
-  .item-card:hover { border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.35); }
-  .item-card.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
-  .item-cover { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; background: var(--surface2); }
-  .item-cover-ph { width: 100%; aspect-ratio: 2/3; display: flex; align-items: center; justify-content: center; background: var(--surface2); font-size: 48px; color: var(--muted2); }
-  .item-body { padding: 10px 11px 12px; }
-  .item-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .item-badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-  .badge { font-size: 10px; padding: 2px 7px; border-radius: 20px; font-weight: 500; }
-  .b-owned { background: rgba(52,211,153,0.12); color: #34d399; }
-  .b-notowned { background: rgba(248,113,113,0.1); color: #f87171; }
-  .b-wish { background: rgba(251,191,36,0.1); color: #fbbf24; }
-  .b-done { background: rgba(124,107,250,0.15); color: #a78bfa; }
-  .b-prog { background: rgba(251,191,36,0.1); color: #fbbf24; }
-  .b-not { background: rgba(255,255,255,0.06); color: var(--muted); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(165px,1fr)); gap:14px; }
+  .item-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; cursor:pointer; transition:all 0.2s; }
+  .item-card:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,0.35); }
+  .item-card.selected { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .item-cover { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--surface2); }
+  .item-cover-ph { width:100%; aspect-ratio:2/3; display:flex; align-items:center; justify-content:center; background:var(--surface2); font-size:48px; color:var(--muted2); }
+  .item-body { padding:10px 11px 12px; }
+  .item-title { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .item-meta { font-size:11px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .item-badges { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  .badge { font-size:10px; padding:2px 7px; border-radius:20px; font-weight:500; }
+  .b-owned { background:rgba(52,211,153,0.12); color:#34d399; }
+  .b-notowned { background:rgba(248,113,113,0.1); color:#f87171; }
+  .b-wish { background:rgba(251,191,36,0.1); color:#fbbf24; }
+  .b-done { background:rgba(124,107,250,0.15); color:#a78bfa; }
+  .b-prog { background:rgba(251,191,36,0.1); color:#fbbf24; }
+  .b-not { background:rgba(255,255,255,0.06); color:var(--muted); }
 
-  /* DETAIL PANEL */
-  .detail-panel {
-    width: 340px; background: var(--surface); border-left: 1px solid var(--border);
-    display: none; flex-direction: column; flex-shrink: 0; overflow: hidden;
-  }
-  .detail-panel.open { display: flex; }
-  .detail-cover-wrap { position: relative; }
-  .detail-cover { width: 100%; height: 200px; object-fit: cover; display: block; background: var(--surface2); }
-  .detail-cover-ph { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background: var(--surface2); font-size: 64px; }
-  .detail-close {
-    position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
-    background: rgba(0,0,0,0.6); border: none; color: #fff; border-radius: 50%;
-    cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;
-  }
-  .detail-body { padding: 18px 18px 0; flex: 1; overflow-y: auto; }
-  .detail-title { font-size: 17px; font-weight: 700; line-height: 1.3; margin-bottom: 4px; }
-  .detail-cat { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
-  .detail-section { margin-bottom: 14px; }
-  .detail-slabel { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted2); font-weight: 600; margin-bottom: 6px; }
-  .detail-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
-  .detail-progress { font-size: 15px; color: var(--warning); font-weight: 600; }
-  .detail-actions { padding: 14px 18px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; }
-  .dbtn { flex: 1; padding: 8px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: center; border: none; }
-  .dbtn-edit { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-  .dbtn-edit:hover { border-color: var(--accent); color: var(--accent2); }
-  .dbtn-del { background: rgba(248,113,113,0.08); color: var(--danger); border: 1px solid rgba(248,113,113,0.2); }
-  .dbtn-del:hover { background: rgba(248,113,113,0.15); }
+  /* DETAIL */
+  .detail-panel { width:340px; background:var(--surface); border-left:1px solid var(--border); display:none; flex-direction:column; flex-shrink:0; overflow:hidden; }
+  .detail-panel.open { display:flex; }
+  .detail-cover-wrap { position:relative; }
+  .detail-cover { width:100%; height:200px; object-fit:cover; display:block; background:var(--surface2); }
+  .detail-cover-ph { width:100%; height:200px; display:flex; align-items:center; justify-content:center; background:var(--surface2); font-size:64px; }
+  .detail-close { position:absolute; top:10px; right:10px; width:30px; height:30px; background:rgba(0,0,0,0.6); border:none; color:#fff; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .detail-body { padding:18px 18px 0; flex:1; overflow-y:auto; }
+  .detail-title { font-size:17px; font-weight:700; line-height:1.3; margin-bottom:4px; }
+  .detail-cat { font-size:12px; color:var(--muted); margin-bottom:14px; }
+  .detail-section { margin-bottom:14px; }
+  .detail-slabel { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--muted2); font-weight:600; margin-bottom:6px; }
+  .detail-desc { font-size:13px; color:var(--muted); line-height:1.65; }
+  .detail-progress { font-size:15px; color:var(--warning); font-weight:600; }
+  .detail-actions { padding:14px 18px 16px; border-top:1px solid var(--border); display:flex; gap:8px; }
+  .dbtn { flex:1; padding:8px; border-radius:8px; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; text-align:center; border:none; }
+  .dbtn-edit { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+  .dbtn-edit:hover { border-color:var(--accent); color:var(--accent2); }
+  .dbtn-del { background:rgba(248,113,113,0.08); color:var(--danger); border:1px solid rgba(248,113,113,0.2); }
+  .dbtn-del:hover { background:rgba(248,113,113,0.15); }
 
-  /* EMPTY */
-  .empty { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--muted); }
-  .empty .eicon { font-size: 52px; margin-bottom: 14px; }
-  .empty h3 { font-size: 15px; color: var(--text); margin-bottom: 6px; }
-  .empty p { font-size: 13px; }
+  .empty { grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty .eicon { font-size:52px; margin-bottom:14px; }
+  .empty h3 { font-size:15px; color:var(--text); margin-bottom:6px; }
 
   /* LOADING */
-  .loading-overlay {
-    position: fixed; inset: 0; background: var(--bg);
-    display: flex; align-items: center; justify-content: center; z-index: 200; flex-direction: column; gap: 14px;
-  }
-  .spinner { width: 36px; height: 36px; border: 3px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-size: 13px; color: var(--muted); }
+  .loading-overlay { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:200; flex-direction:column; gap:14px; }
+  .spinner { width:36px; height:36px; border:3px solid var(--border2); border-top-color:var(--accent); border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { font-size:13px; color:var(--muted); }
 
   /* MODAL */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-lg);
-    width: 100%; max-width: 560px; max-height: 92vh; overflow-y: auto;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
-  }
-  .modal-hdr {
-    padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); z-index: 1;
-  }
-  .modal-ttl { font-size: 15px; font-weight: 700; }
-  .modal-x { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; padding: 4px; border-radius: 6px; line-height: 1; }
-  .modal-x:hover { color: var(--text); background: var(--surface2); }
-  .modal-body { padding: 18px 22px; }
-  .flabel { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
-  .finput {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
-    border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 13.5px; outline: none; transition: border-color 0.15s;
-  }
-  .finput:focus { border-color: var(--accent); }
-  .finput::placeholder { color: var(--muted2); }
-  textarea.finput { min-height: 80px; resize: vertical; font-family: inherit; }
-  select.finput { appearance: none; cursor: pointer; }
-  .frow { margin-bottom: 14px; }
-  .frow2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-
-  /* SEARCH RESULTS */
-  .search-results {
-    margin-top: 6px; border: 1px solid var(--border2); border-radius: 8px;
-    overflow: hidden; max-height: 220px; overflow-y: auto; display: none;
-  }
-  .search-results.visible { display: block; }
-  .search-result-item {
-    display: flex; align-items: center; gap: 10px; padding: 8px 10px;
-    cursor: pointer; transition: background 0.12s; border-bottom: 1px solid var(--border);
-  }
-  .search-result-item:last-child { border-bottom: none; }
-  .search-result-item:hover { background: var(--surface2); }
-  .sri-cover { width: 32px; height: 48px; object-fit: cover; border-radius: 4px; background: var(--surface3); flex-shrink: 0; }
-  .sri-cover-ph { width: 32px; height: 48px; border-radius: 4px; background: var(--surface3); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
-  .sri-title { font-size: 13px; font-weight: 500; flex: 1; }
-  .sri-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .searching-msg { padding: 12px; text-align: center; font-size: 12px; color: var(--muted); }
-
-  /* COVER PREVIEW */
-  .cover-prev {
-    width: 100%; height: 130px; border-radius: 8px; background: var(--surface3);
-    display: flex; align-items: center; justify-content: center; margin-top: 8px; overflow: hidden;
-  }
-  .cover-prev img { width: 100%; height: 100%; object-fit: cover; }
-
-  .modal-ftr {
-    padding: 14px 22px 18px; border-top: 1px solid var(--border);
-    display: flex; justify-content: flex-end; gap: 10px;
-  }
-  .btn-cancel { padding: 8px 18px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); font-size: 13px; cursor: pointer; }
-  .btn-cancel:hover { color: var(--text); }
-  .btn-save { padding: 8px 20px; border-radius: 8px; background: var(--accent); border: none; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .btn-save:hover { background: var(--accent2); }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius-lg); width:100%; max-width:560px; max-height:92vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0,0,0,0.6); }
+  .modal-hdr { padding:18px 22px 14px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:var(--surface); z-index:1; }
+  .modal-ttl { font-size:15px; font-weight:700; }
+  .modal-x { background:none; border:none; color:var(--muted); cursor:pointer; font-size:18px; padding:4px; border-radius:6px; line-height:1; }
+  .modal-x:hover { color:var(--text); background:var(--surface2); }
+  .modal-body { padding:18px 22px; }
+  .flabel { font-size:11px; font-weight:600; color:var(--muted); margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:0.5px; }
+  .finput { width:100%; background:var(--surface2); border:1px solid var(--border2); border-radius:8px; padding:9px 12px; color:var(--text); font-size:13.5px; outline:none; transition:border-color 0.15s; }
+  .finput:focus { border-color:var(--accent); }
+  .finput::placeholder { color:var(--muted2); }
+  textarea.finput { min-height:80px; resize:vertical; font-family:inherit; }
+  select.finput { appearance:none; cursor:pointer; }
+  .frow { margin-bottom:14px; }
+  .frow2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+  .search-results { margin-top:6px; border:1px solid var(--border2); border-radius:8px; overflow:hidden; max-height:220px; overflow-y:auto; display:none; }
+  .search-results.visible { display:block; }
+  .search-result-item { display:flex; align-items:center; gap:10px; padding:8px 10px; cursor:pointer; transition:background 0.12s; border-bottom:1px solid var(--border); }
+  .search-result-item:last-child { border-bottom:none; }
+  .search-result-item:hover { background:var(--surface2); }
+  .sri-cover { width:32px; height:48px; object-fit:cover; border-radius:4px; background:var(--surface3); flex-shrink:0; }
+  .sri-cover-ph { width:32px; height:48px; border-radius:4px; background:var(--surface3); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
+  .sri-title { font-size:13px; font-weight:500; }
+  .sri-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+  .searching-msg { padding:12px; text-align:center; font-size:12px; color:var(--muted); }
+  .cover-prev { width:100%; height:130px; border-radius:8px; background:var(--surface3); display:flex; align-items:center; justify-content:center; margin-top:8px; overflow:hidden; }
+  .cover-prev img { width:100%; height:100%; object-fit:cover; }
+  .modal-ftr { padding:14px 22px 18px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:10px; }
+  .btn-cancel { padding:8px 18px; border-radius:8px; background:var(--surface2); border:1px solid var(--border); color:var(--muted); font-size:13px; cursor:pointer; }
+  .btn-cancel:hover { color:var(--text); }
+  .btn-save { padding:8px 20px; border-radius:8px; background:var(--accent); border:none; color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-save:hover { background:var(--accent2); }
 
   /* TOASTS */
-  #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
-  .toast {
-    background: var(--surface); border: 1px solid var(--border2); border-radius: 8px;
-    padding: 10px 16px; font-size: 13px; color: var(--text);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slidein 0.25s ease; max-width: 280px;
-  }
-  @keyframes slidein { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-  .toast.success { border-left: 3px solid var(--success); }
-  .toast.error { border-left: 3px solid var(--danger); }
+  #toast-container { position:fixed; bottom:20px; right:20px; z-index:999; display:flex; flex-direction:column; gap:8px; }
+  .toast { background:var(--surface); border:1px solid var(--border2); border-radius:8px; padding:10px 16px; font-size:13px; color:var(--text); box-shadow:0 8px 24px rgba(0,0,0,0.4); animation:slidein 0.25s ease; max-width:280px; }
+  @keyframes slidein { from { transform:translateX(40px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+  .toast.success { border-left:3px solid var(--success); }
+  .toast.error { border-left:3px solid var(--danger); }
 
-  /* MOBILE */
-  @media (max-width: 700px) {
-    .sidebar { width: 56px; }
-    .logo-text, .logo-sub, .nav-item .nav-lbl, .nav-count, .add-cat-btn span:not(:first-child), .user-name, .user-logout { display: none; }
-    .user-pill { padding: 6px; justify-content: center; }
-    .sidebar-logo { padding: 12px 8px; justify-content: center; }
-    .logo-icon { font-size: 20px; }
-    .detail-panel.open { position: fixed; inset: 0; width: 100%; z-index: 50; }
-    .search-box { display: none; }
-    .topbar { padding: 10px 14px; }
-    .content { padding: 12px 14px; }
-    .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-    .frow2 { grid-template-columns: 1fr; }
+  @media (max-width:700px) {
+    .sidebar { width:56px; }
+    .logo-text,.logo-sub,.nav-item .nav-lbl,.nav-count,.add-cat-btn span:not(:first-child),.user-name,.user-logout { display:none; }
+    .user-pill { padding:6px; justify-content:center; }
+    .sidebar-logo { padding:12px 8px; justify-content:center; }
+    .detail-panel.open { position:fixed; inset:0; width:100%; z-index:50; }
+    .search-box { display:none; }
+    .topbar { padding:10px 14px; }
+    .content { padding:12px 14px; }
+    .grid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; }
+    .frow2 { grid-template-columns:1fr; }
   }
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
 <div class="loading-overlay" id="loading">
   <div class="spinner"></div>
-  <div class="loading-text">Chargement de Collecto…</div>
+  <div class="loading-text">Chargement…</div>
 </div>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo">📦</div>
     <div class="auth-title">Collecto</div>
-    <div class="auth-sub">Ta collection, partout avec toi.<br>Connecte-toi pour synchroniser tous tes appareils.</div>
-
-    <!-- Google -->
-    <button class="btn-google" onclick="loginGoogle()">
-      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.5 1.2 8.9 3.2l6.6-6.6C35.5 2.5 30.1 0 24 0 14.6 0 6.6 5.4 2.5 13.3l7.7 6C12.3 13 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h12.7c-.5 2.9-2.2 5.4-4.7 7l7.3 5.7c4.3-3.9 6.9-9.8 6.9-16.7z"/><path fill="#FBBC05" d="M10.2 28.7A14.5 14.5 0 0 1 9.5 24c0-1.7.3-3.3.7-4.7l-7.7-6A23.9 23.9 0 0 0 0 24c0 3.9.9 7.5 2.5 10.7l7.7-6z"/><path fill="#34A853" d="M24 48c6.1 0 11.2-2 14.9-5.4l-7.3-5.7c-2 1.4-4.6 2.1-7.6 2.1-6.3 0-11.7-4.3-13.6-10l-7.7 6C6.6 42.6 14.6 48 24 48z"/></svg>
-      Continuer avec Google
-    </button>
-
-    <div class="auth-divider">ou</div>
-
-    <div id="auth-form">
-      <input class="auth-input" id="auth-email" type="email" placeholder="Email" autocomplete="email">
-      <input class="auth-input" id="auth-pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
-      <button class="btn-primary" onclick="loginEmail()">Se connecter</button>
-      <div class="auth-error" id="auth-error"></div>
-      <div class="auth-toggle">Pas encore de compte ? <a onclick="switchToRegister()">Créer un compte</a></div>
+    <div class="auth-sub" id="auth-sub">Connecte-toi pour retrouver<br>ta collection sur tous tes appareils.</div>
+    <input class="auth-input" id="auth-pseudo" type="text" placeholder="Pseudo" maxlength="30" autocomplete="username">
+    <input class="auth-input" id="auth-pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
+    <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Se connecter</button>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-toggle" id="auth-toggle">
+      Pas encore de compte ? <a onclick="switchMode()">Créer un compte</a>
     </div>
   </div>
 </div>
 
-<!-- APP SCREEN -->
+<!-- APP -->
 <div id="app-screen">
 <div class="app">
-
-  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="sidebar-logo">
       <span class="logo-icon">📦</span>
-      <div>
-        <div class="logo-text">Collecto</div>
-        <div class="logo-sub">Collection</div>
-      </div>
+      <div><div class="logo-text">Collecto</div><div class="logo-sub">Collection</div></div>
     </div>
-    <div class="user-pill" title="Déconnexion">
+    <div class="user-pill">
       <div class="user-avatar" id="user-avatar">?</div>
       <div class="user-name" id="user-name">Utilisateur</div>
       <div class="user-logout" onclick="logout()" title="Se déconnecter">↪</div>
     </div>
-    <nav class="sidebar-nav" id="sidebar-nav">
-      <div class="nav-label">Catégories</div>
-    </nav>
+    <nav class="sidebar-nav" id="sidebar-nav"><div class="nav-label">Catégories</div></nav>
     <div class="sidebar-footer">
       <button class="add-cat-btn" onclick="openCatModal()">
-        <span style="font-size:16px">+</span>
-        <span>Nouvelle catégorie</span>
+        <span style="font-size:16px">+</span><span>Nouvelle catégorie</span>
       </button>
     </div>
   </div>
 
-  <!-- MAIN -->
   <div class="main">
     <div class="topbar">
       <div class="topbar-info">
@@ -383,7 +249,7 @@
         <div class="topbar-sub" id="topbar-sub"></div>
       </div>
       <div class="search-box">
-        <span style="color:var(--muted);font-size:14px">⌕</span>
+        <span style="color:var(--muted)">⌕</span>
         <input type="text" placeholder="Rechercher…" id="search-input" oninput="renderGrid()">
       </div>
       <div class="filter-tabs" id="filter-tabs"></div>
@@ -395,7 +261,6 @@
     </div>
   </div>
 
-  <!-- DETAIL PANEL -->
   <div class="detail-panel" id="detail-panel">
     <div class="detail-cover-wrap">
       <div id="detail-cover-zone"></div>
@@ -416,8 +281,8 @@
     </div>
     <div class="modal-body">
       <div class="frow">
-        <label class="flabel">Recherche rapide (titre)</label>
-        <input class="finput" id="f-search" placeholder="Tape un titre pour chercher automatiquement…" oninput="onSearchInput()" autocomplete="off">
+        <label class="flabel">Recherche automatique</label>
+        <input class="finput" id="f-search" placeholder="Tape un titre pour chercher couverture + infos…" oninput="onSearchInput()" autocomplete="off">
         <div class="search-results" id="search-results"></div>
       </div>
       <div class="frow">
@@ -430,7 +295,7 @@
           <select class="finput" id="f-owned">
             <option value="owned">✓ Possédé</option>
             <option value="notowned">✗ Non possédé</option>
-            <option value="wishlist">♡ Liste de souhaits</option>
+            <option value="wishlist">♡ Souhait</option>
           </select>
         </div>
         <div>
@@ -443,15 +308,13 @@
         <input class="finput" id="f-progress" placeholder="Ex: Tome 12, 34h…">
       </div>
       <div class="frow">
-        <label class="flabel">Image (URL ou recherche auto)</label>
+        <label class="flabel">Image (URL)</label>
         <input class="finput" id="f-image" placeholder="https://…" oninput="updateCoverPreview()">
-        <div class="cover-prev" id="cover-prev">
-          <span style="color:var(--muted2);font-size:12px">Aperçu de la couverture</span>
-        </div>
+        <div class="cover-prev" id="cover-prev"><span style="color:var(--muted2);font-size:12px">Aperçu de la couverture</span></div>
       </div>
       <div class="frow">
         <label class="flabel">Description</label>
-        <textarea class="finput" id="f-desc" placeholder="Notes personnelles, avis…"></textarea>
+        <textarea class="finput" id="f-desc" placeholder="Notes, avis…"></textarea>
       </div>
     </div>
     <div class="modal-ftr">
@@ -461,7 +324,7 @@
   </div>
 </div>
 
-<!-- CATEGORY MODAL -->
+<!-- CAT MODAL -->
 <div class="modal-overlay" id="cat-modal">
   <div class="modal">
     <div class="modal-hdr">
@@ -481,20 +344,20 @@
         <div>
           <label class="flabel">Type de recherche</label>
           <select class="finput" id="cat-api">
-            <option value="game">Jeux vidéo</option>
-            <option value="manga">Mangas / BD</option>
-            <option value="book">Livres</option>
-            <option value="tmdb">Films / Séries</option>
+            <option value="game">Jeux vidéo (RAWG)</option>
+            <option value="manga">Mangas (Jikan)</option>
+            <option value="book">Livres (OpenLibrary)</option>
+            <option value="tmdb">Films / Séries (TMDB)</option>
             <option value="none">Aucune (manuel)</option>
           </select>
         </div>
       </div>
       <div class="frow">
-        <label class="flabel">Label d'activité (ex: Joué, Lu, Regardé…)</label>
+        <label class="flabel">Label activité (ex: Joué, Lu, Regardé…)</label>
         <input class="finput" id="cat-status" placeholder="Ex: Joué">
       </div>
       <div class="frow">
-        <label class="flabel">Label de progression (ex: Heures, Tome, Épisode…)</label>
+        <label class="flabel">Label progression (ex: Heures, Tome, Épisode…)</label>
         <input class="finput" id="cat-progress" placeholder="Ex: Heures de jeu">
       </div>
     </div>
@@ -509,14 +372,15 @@
 
 <script>
 // ══════════════════════════════════════════
-//  ⚙️  FIREBASE CONFIG
-//  Remplace ces valeurs par tes propres clés Firebase !
-//  👉 https://console.firebase.google.com
-//  Crée un projet → Ajouter une appli web → copie firebaseConfig
+//  ⚙️  CONFIG FIREBASE
+//  1. Va sur https://console.firebase.google.com
+//  2. Crée un projet → Ajouter une appli web
+//  3. Copie ton firebaseConfig ici
+//  4. Dans Firestore → crée une base en mode "test"
+//  5. PAS besoin d'activer Authentication !
 // ══════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey: "REMPLACE_PAR_TA_CLE_API",
-  authDomain: "REMPLACE_PAR_TON_AUTH_DOMAIN",
   projectId: "REMPLACE_PAR_TON_PROJECT_ID",
   storageBucket: "REMPLACE_PAR_TON_STORAGE_BUCKET",
   messagingSenderId: "REMPLACE_PAR_TON_SENDER_ID",
@@ -524,111 +388,136 @@ const FIREBASE_CONFIG = {
 };
 
 // ══════════════════════════════════════════
-//  🔑  CLÉS API OPTIONNELLES
-//  RAWG (jeux vidéo) : https://rawg.io/apidocs  (gratuit)
-//  TMDB (films/séries) : https://developer.themoviedb.org  (gratuit)
-//  Jikan (mangas) : gratuit, pas de clé nécessaire
-//  OpenLibrary (livres) : gratuit, pas de clé nécessaire
+//  🔑  CLÉS API (optionnelles)
+//  RAWG  → https://rawg.io/apidocs  (gratuit)
+//  TMDB  → https://www.themoviedb.org/settings/api  (gratuit)
+//  Jikan & OpenLibrary → gratuits, sans clé
 // ══════════════════════════════════════════
-const RAWG_KEY = ""; // ex: "abc123..."
-const TMDB_KEY = ""; // ex: "abc123..."
+const RAWG_KEY  = "";
+const TMDB_KEY  = "";
 
-// ── Firebase init ──
+// ── Init Firebase (Firestore seulement, pas d'Auth) ──
 firebase.initializeApp(FIREBASE_CONFIG);
-const auth = firebase.auth();
 const db = firebase.firestore();
-const googleProvider = new firebase.auth.GoogleAuthProvider();
 
 // ── State ──
-let currentUser = null;
-let categories = [];
-let items = [];
-let activeCatId = null;
+let currentUser  = null; // { uid, pseudo }
+let categories   = [];
+let items        = [];
+let activeCatId  = null;
 let activeFilter = 'all';
 let editingItemId = null;
 let selectedItemId = null;
-let searchTimer = null;
-let isRegisterMode = false;
+let searchTimer  = null;
+let isRegister   = false;
 
-// ── Default categories ──
 const DEFAULT_CATS = [
-  { id: 'games', name: 'Jeux vidéo', icon: '🎮', statusLabel: 'Joué', progressLabel: 'Heures de jeu', api: 'game', statuses: ['Joué','En cours','Non joué','Abandonné'] },
-  { id: 'manga', name: 'Mangas / BD', icon: '📚', statusLabel: 'Lu', progressLabel: 'Tome / Chapitre', api: 'manga', statuses: ['Lu','En cours','Non lu','Abandonné'] },
-  { id: 'books', name: 'Livres', icon: '📖', statusLabel: 'Lu', progressLabel: 'Page', api: 'book', statuses: ['Lu','En cours','Non lu','Abandonné'] },
-  { id: 'films', name: 'Films / Séries', icon: '🎬', statusLabel: 'Regardé', progressLabel: 'Saison / Épisode', api: 'tmdb', statuses: ['Regardé','En cours','Non regardé','Abandonné'] },
+  { id:'games', name:'Jeux vidéo',    icon:'🎮', statusLabel:'Joué',    progressLabel:'Heures de jeu',    api:'game',  statuses:['Joué','En cours','Non joué','Abandonné'] },
+  { id:'manga', name:'Mangas / BD',   icon:'📚', statusLabel:'Lu',      progressLabel:'Tome / Chapitre',  api:'manga', statuses:['Lu','En cours','Non lu','Abandonné'] },
+  { id:'books', name:'Livres',        icon:'📖', statusLabel:'Lu',      progressLabel:'Page',             api:'book',  statuses:['Lu','En cours','Non lu','Abandonné'] },
+  { id:'films', name:'Films / Séries',icon:'🎬', statusLabel:'Regardé', progressLabel:'Saison / Épisode', api:'tmdb',  statuses:['Regardé','En cours','Non regardé','Abandonné'] },
 ];
 
 // ══════════════════════════════════════════
-//  AUTH
+//  AUTH SIMPLE — pseudo + mot de passe hashé dans Firestore
+//  Pas de Firebase Auth — juste une collection "users"
+//  Structure : users/{pseudo} → { passwordHash, createdAt }
+//  Session : localStorage pour persister la session
 // ══════════════════════════════════════════
-auth.onAuthStateChanged(async user => {
-  hideLoading();
-  if (user) {
-    currentUser = user;
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display = 'block';
-    updateUserUI();
-    await loadUserData();
-    render();
-  } else {
-    currentUser = null;
-    document.getElementById('auth-screen').style.display = 'flex';
-    document.getElementById('app-screen').style.display = 'none';
-  }
-});
 
-function hideLoading() { document.getElementById('loading').style.display = 'none'; }
-
-async function loginGoogle() {
-  try { await auth.signInWithPopup(googleProvider); }
-  catch(e) { showAuthError(e.message); }
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-async function loginEmail() {
-  const email = document.getElementById('auth-email').value.trim();
-  const pass = document.getElementById('auth-pass').value;
-  if (!email || !pass) return showAuthError('Remplis tous les champs');
+function switchMode() {
+  isRegister = !isRegister;
+  document.getElementById('auth-btn').textContent = isRegister ? 'Créer le compte' : 'Se connecter';
+  document.getElementById('auth-sub').innerHTML = isRegister
+    ? 'Choisis un pseudo et un mot de passe.'
+    : 'Connecte-toi pour retrouver<br>ta collection sur tous tes appareils.';
+  document.getElementById('auth-toggle').innerHTML = isRegister
+    ? 'Déjà un compte ? <a onclick="switchMode()">Se connecter</a>'
+    : 'Pas encore de compte ? <a onclick="switchMode()">Créer un compte</a>';
+  document.getElementById('auth-error').textContent = '';
+}
+
+function setAuthError(msg) { document.getElementById('auth-error').textContent = msg; }
+
+async function handleAuth() {
+  const pseudo = document.getElementById('auth-pseudo').value.trim().toLowerCase();
+  const pass   = document.getElementById('auth-pass').value;
+  if (!pseudo || !pass) return setAuthError('Remplis tous les champs.');
+  if (pseudo.length < 2) return setAuthError('Pseudo trop court (2 caractères min).');
+  if (pass.length < 4)   return setAuthError('Mot de passe trop court (4 caractères min).');
+
+  const hash = await sha256(pass + pseudo); // sel = pseudo
+  const userRef = db.collection('users').doc(pseudo);
+
   try {
-    if (isRegisterMode) await auth.createUserWithEmailAndPassword(email, pass);
-    else await auth.signInWithEmailAndPassword(email, pass);
+    if (isRegister) {
+      const snap = await userRef.get();
+      if (snap.exists) return setAuthError('Ce pseudo est déjà pris.');
+      await userRef.set({ passwordHash: hash, createdAt: Date.now() });
+      toast('Compte créé !', 'success');
+    } else {
+      const snap = await userRef.get();
+      if (!snap.exists) return setAuthError('Pseudo introuvable.');
+      if (snap.data().passwordHash !== hash) return setAuthError('Mot de passe incorrect.');
+    }
+    // Session
+    localStorage.setItem('collecto_session', JSON.stringify({ uid: pseudo, pseudo }));
+    await startSession(pseudo);
   } catch(e) {
-    const msgs = { 'auth/wrong-password':'Mot de passe incorrect', 'auth/user-not-found':'Aucun compte avec cet email', 'auth/email-already-in-use':'Email déjà utilisé', 'auth/weak-password':'Mot de passe trop court (6 car. min)' };
-    showAuthError(msgs[e.code] || e.message);
+    setAuthError('Erreur de connexion. Vérifie ta config Firebase.');
+    console.error(e);
   }
 }
 
-function switchToRegister() {
-  isRegisterMode = !isRegisterMode;
-  document.querySelector('.btn-primary').textContent = isRegisterMode ? 'Créer le compte' : 'Se connecter';
-  document.querySelector('.auth-toggle').innerHTML = isRegisterMode
-    ? 'Déjà un compte ? <a onclick="switchToRegister()">Se connecter</a>'
-    : 'Pas encore de compte ? <a onclick="switchToRegister()">Créer un compte</a>';
+async function startSession(pseudo) {
+  currentUser = { uid: pseudo, pseudo };
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('user-name').textContent = pseudo;
+  document.getElementById('user-avatar').textContent = pseudo[0].toUpperCase();
+  await loadUserData();
+  render();
 }
 
-function showAuthError(msg) { document.getElementById('auth-error').textContent = msg; }
-async function logout() { await auth.signOut(); toast('Déconnecté'); }
+function logout() {
+  localStorage.removeItem('collecto_session');
+  currentUser = null; categories = []; items = [];
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('auth-pseudo').value = '';
+  document.getElementById('auth-pass').value = '';
+  document.getElementById('auth-error').textContent = '';
+  toast('Déconnecté');
+}
 
-function updateUserUI() {
-  if (!currentUser) return;
-  const name = document.getElementById('user-name');
-  const avatar = document.getElementById('user-avatar');
-  name.textContent = currentUser.displayName || currentUser.email?.split('@')[0] || 'Utilisateur';
-  if (currentUser.photoURL) {
-    avatar.innerHTML = `<img src="${currentUser.photoURL}" alt="">`;
-  } else {
-    avatar.textContent = (currentUser.displayName || currentUser.email || '?')[0].toUpperCase();
+// Restore session on load
+async function init() {
+  const saved = localStorage.getItem('collecto_session');
+  if (saved) {
+    try {
+      const { uid } = JSON.parse(saved);
+      // Verify user still exists
+      const snap = await db.collection('users').doc(uid).get();
+      if (snap.exists) { await startSession(uid); return; }
+    } catch(e) { localStorage.removeItem('collecto_session'); }
   }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
 }
 
 // ══════════════════════════════════════════
-//  FIRESTORE — Load / Save
+//  FIRESTORE DATA
 // ══════════════════════════════════════════
 async function loadUserData() {
+  document.getElementById('loading').style.display = 'flex';
   const uid = currentUser.uid;
-  // Categories
   const catSnap = await db.collection('users').doc(uid).collection('categories').orderBy('order').get();
   if (catSnap.empty) {
-    // First time: push defaults
     categories = DEFAULT_CATS;
     for (let i = 0; i < categories.length; i++) {
       await db.collection('users').doc(uid).collection('categories').doc(categories[i].id).set({ ...categories[i], order: i });
@@ -636,88 +525,60 @@ async function loadUserData() {
   } else {
     categories = catSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
-  // Items
-  const itemSnap = await db.collection('users').doc(uid).collection('items').orderBy('createdAt', 'desc').get();
+  const itemSnap = await db.collection('users').doc(uid).collection('items').orderBy('createdAt','desc').get();
   items = itemSnap.docs.map(d => ({ id: d.id, ...d.data() }));
   activeCatId = categories[0]?.id || null;
+  document.getElementById('loading').style.display = 'none';
 }
 
 async function saveItemToDb(item) {
-  const uid = currentUser.uid;
-  const ref = db.collection('users').doc(uid).collection('items').doc(item.id);
-  await ref.set(item);
+  await db.collection('users').doc(currentUser.uid).collection('items').doc(item.id).set(item);
 }
-
 async function deleteItemFromDb(id) {
-  const uid = currentUser.uid;
-  await db.collection('users').doc(uid).collection('items').doc(id).delete();
+  await db.collection('users').doc(currentUser.uid).collection('items').doc(id).delete();
 }
-
 async function saveCatToDb(cat) {
-  const uid = currentUser.uid;
-  await db.collection('users').doc(uid).collection('categories').doc(cat.id).set(cat);
+  await db.collection('users').doc(currentUser.uid).collection('categories').doc(cat.id).set(cat);
 }
 
 // ══════════════════════════════════════════
-//  COVER SEARCH APIs
+//  COVER SEARCH
 // ══════════════════════════════════════════
-async function searchCovers(query, api) {
-  if (!query || query.length < 2) return [];
+async function searchCovers(q, api) {
+  if (!q || q.length < 2) return [];
   try {
-    if (api === 'game') return await searchGame(query);
-    if (api === 'manga') return await searchManga(query);
-    if (api === 'book') return await searchBook(query);
-    if (api === 'tmdb') return await searchTMDB(query);
+    if (api === 'game')  return await searchGame(q);
+    if (api === 'manga') return await searchManga(q);
+    if (api === 'book')  return await searchBook(q);
+    if (api === 'tmdb')  return await searchTMDB(q);
   } catch(e) { console.warn('Search error', e); }
   return [];
 }
 
 async function searchGame(q) {
-  if (!RAWG_KEY) return googleImageSearch(q, '🎮');
-  const url = `https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(q)}&page_size=6`;
-  const r = await fetch(url); const d = await r.json();
-  return (d.results || []).map(g => ({
-    title: g.name,
-    cover: g.background_image,
-    meta: g.released ? g.released.slice(0,4) : '',
-  }));
+  if (!RAWG_KEY) return [];
+  const r = await fetch(`https://api.rawg.io/api/games?key=${RAWG_KEY}&search=${encodeURIComponent(q)}&page_size=6`);
+  const d = await r.json();
+  return (d.results||[]).map(g => ({ title:g.name, cover:g.background_image, meta:g.released?.slice(0,4)||'' }));
 }
 
 async function searchManga(q) {
-  const url = `https://api.jikan.moe/v4/manga?q=${encodeURIComponent(q)}&limit=6`;
-  const r = await fetch(url); const d = await r.json();
-  return (d.data || []).map(m => ({
-    title: m.title,
-    cover: m.images?.jpg?.large_image_url || m.images?.jpg?.image_url,
-    meta: m.status || '',
-  }));
+  const r = await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(q)}&limit=6`);
+  const d = await r.json();
+  return (d.data||[]).map(m => ({ title:m.title, cover:m.images?.jpg?.large_image_url||m.images?.jpg?.image_url, meta:m.status||'' }));
 }
 
 async function searchBook(q) {
-  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=title,author_name,cover_i,first_publish_year`;
-  const r = await fetch(url); const d = await r.json();
-  return (d.docs || []).slice(0,6).map(b => ({
-    title: b.title,
-    cover: b.cover_i ? `https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg` : null,
-    meta: b.author_name?.[0] || '',
-  }));
+  const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=title,author_name,cover_i`);
+  const d = await r.json();
+  return (d.docs||[]).slice(0,6).map(b => ({ title:b.title, cover:b.cover_i?`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`:null, meta:b.author_name?.[0]||'' }));
 }
 
 async function searchTMDB(q) {
-  if (!TMDB_KEY) return googleImageSearch(q, '🎬');
-  const url = `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`;
-  const r = await fetch(url); const d = await r.json();
-  return (d.results || []).slice(0,6).filter(x => x.poster_path).map(x => ({
-    title: x.title || x.name,
-    cover: `https://image.tmdb.org/t/p/w300${x.poster_path}`,
-    meta: (x.release_date || x.first_air_date || '').slice(0,4),
-  }));
-}
-
-// Fallback: recherche Google Images via un proxy public
-async function googleImageSearch(q, icon) {
-  // Sans clé API, on retourne juste des résultats vides — l'utilisateur peut coller une URL manuellement
-  return [];
+  if (!TMDB_KEY) return [];
+  const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
+  const d = await r.json();
+  return (d.results||[]).slice(0,6).filter(x=>x.poster_path).map(x => ({ title:x.title||x.name, cover:`https://image.tmdb.org/t/p/w300${x.poster_path}`, meta:(x.release_date||x.first_air_date||'').slice(0,4) }));
 }
 
 // ══════════════════════════════════════════
@@ -726,14 +587,14 @@ async function googleImageSearch(q, icon) {
 function getActiveCat() { return categories.find(c => c.id === activeCatId); }
 
 function getCatItems(catId) {
-  const q = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
   return items.filter(i => {
     if (i.catId !== catId) return false;
     if (q && !i.title.toLowerCase().includes(q)) return false;
-    if (activeFilter === 'owned') return i.owned === 'owned';
-    if (activeFilter === 'notowned') return i.owned !== 'owned';
-    if (activeFilter === 'done') { const cat = getActiveCat(); return cat && i.status === cat.statuses[0]; }
-    if (activeFilter === 'inprogress') return i.status === 'En cours';
+    if (activeFilter==='owned')    return i.owned==='owned';
+    if (activeFilter==='notowned') return i.owned!=='owned';
+    if (activeFilter==='done')     { const c=getActiveCat(); return c && i.status===c.statuses[0]; }
+    if (activeFilter==='inprogress') return i.status==='En cours';
     return true;
   });
 }
@@ -742,11 +603,11 @@ function renderSidebar() {
   const nav = document.getElementById('sidebar-nav');
   nav.innerHTML = '<div class="nav-label">Catégories</div>';
   categories.forEach(cat => {
-    const count = items.filter(i => i.catId === cat.id).length;
+    const count = items.filter(i=>i.catId===cat.id).length;
     const btn = document.createElement('button');
-    btn.className = 'nav-item' + (cat.id === activeCatId ? ' active' : '');
+    btn.className = 'nav-item'+(cat.id===activeCatId?' active':'');
     btn.innerHTML = `<span class="nav-icon">${cat.icon}</span><span class="nav-lbl">${cat.name}</span><span class="nav-count">${count}</span>`;
-    btn.onclick = () => { activeCatId = cat.id; activeFilter = 'all'; closeDetail(); render(); };
+    btn.onclick = () => { activeCatId=cat.id; activeFilter='all'; closeDetail(); render(); };
     nav.appendChild(btn);
   });
 }
@@ -754,8 +615,8 @@ function renderSidebar() {
 function renderTopbar() {
   const cat = getActiveCat(); if (!cat) return;
   document.getElementById('topbar-title').textContent = cat.name;
-  const its = getCatItems(cat.id);
-  document.getElementById('topbar-sub').textContent = `${items.filter(i=>i.catId===cat.id).length} item${items.filter(i=>i.catId===cat.id).length!==1?'s':''}`;
+  const total = items.filter(i=>i.catId===cat.id).length;
+  document.getElementById('topbar-sub').textContent = `${total} item${total!==1?'s':''}`;
   const filters = [['all','Tous'],['owned','Possédés'],['inprogress','En cours'],['done','Terminés'],['notowned','Non possédés']];
   document.getElementById('filter-tabs').innerHTML = filters.map(([f,l]) =>
     `<button class="ftab ${activeFilter===f?'active':''}" onclick="setFilter('${f}')">${l}</button>`
@@ -764,10 +625,10 @@ function renderTopbar() {
 
 function renderStats() {
   const cat = getActiveCat(); if (!cat) return;
-  const all = items.filter(i => i.catId === cat.id);
-  const owned = all.filter(i => i.owned === 'owned').length;
-  const done = all.filter(i => i.status === cat.statuses[0]).length;
-  const prog = all.filter(i => i.status === 'En cours').length;
+  const all = items.filter(i=>i.catId===cat.id);
+  const owned = all.filter(i=>i.owned==='owned').length;
+  const done  = all.filter(i=>i.status===cat.statuses[0]).length;
+  const prog  = all.filter(i=>i.status==='En cours').length;
   document.getElementById('stats-row').innerHTML = `
     <div class="stat-card"><div class="stat-val">${all.length}</div><div class="stat-lbl">Total</div></div>
     <div class="stat-card"><div class="stat-val" style="color:var(--success)">${owned}</div><div class="stat-lbl"><span class="stat-dot" style="background:var(--success)"></span>Possédés</div></div>
@@ -785,8 +646,8 @@ function renderGrid() {
     return;
   }
   grid.innerHTML = its.map(item => {
-    const ownBadge = item.owned==='owned' ? '<span class="badge b-owned">Possédé</span>' : item.owned==='wishlist' ? '<span class="badge b-wish">Souhait</span>' : '<span class="badge b-notowned">Non possédé</span>';
-    const sBadge = item.status ? `<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}">${item.status}</span>` : '';
+    const ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Souhait</span>':'<span class="badge b-notowned">Non possédé</span>';
+    const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}">${item.status}</span>`:'';
     const cover = item.image
       ? `<img class="item-cover" src="${item.image}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="item-cover-ph" style="display:none">${cat.icon}</div>`
       : `<div class="item-cover-ph">${cat.icon}</div>`;
@@ -795,7 +656,7 @@ function renderGrid() {
       <div class="item-body">
         <div class="item-title">${esc(item.title)}</div>
         ${item.progress?`<div class="item-meta">${esc(cat.progressLabel)}: ${esc(item.progress)}</div>`:''}
-        <div class="item-badges">${ownBadge}${sBadge}</div>
+        <div class="item-badges">${ob}${sb}</div>
       </div>
     </div>`;
   }).join('');
@@ -803,28 +664,24 @@ function renderGrid() {
 
 function selectItem(id) {
   selectedItemId = id;
-  const item = items.find(i => i.id === id);
-  const cat = categories.find(c => c.id === item?.catId);
-  if (!item || !cat) return;
-  const panel = document.getElementById('detail-panel');
-  panel.classList.add('open');
-  // Cover
-  const cz = document.getElementById('detail-cover-zone');
-  cz.innerHTML = item.image
+  const item = items.find(i=>i.id===id);
+  const cat  = categories.find(c=>c.id===item?.catId);
+  if (!item||!cat) return;
+  document.getElementById('detail-panel').classList.add('open');
+  document.getElementById('detail-cover-zone').innerHTML = item.image
     ? `<img class="detail-cover" src="${item.image}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="detail-cover-ph" style="display:none">${cat.icon}</div>`
     : `<div class="detail-cover-ph">${cat.icon}</div>`;
-  // Body
-  const ownLabel = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Liste de souhaits</span>':'<span class="badge b-notowned">Non possédé</span>';
-  const sLabel = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}" style="font-size:11px;padding:3px 9px">${item.status}</span>`:'';
+  const ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Liste de souhaits</span>':'<span class="badge b-notowned">Non possédé</span>';
+  const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}" style="font-size:11px;padding:3px 9px">${item.status}</span>`:'';
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-title">${esc(item.title)}</div>
     <div class="detail-cat">${cat.icon} ${cat.name}</div>
-    <div class="detail-section"><div class="detail-slabel">Statut</div><div style="display:flex;gap:6px;flex-wrap:wrap">${ownLabel}${sLabel}</div></div>
+    <div class="detail-section"><div class="detail-slabel">Statut</div><div style="display:flex;gap:6px;flex-wrap:wrap">${ob}${sb}</div></div>
     ${item.progress?`<div class="detail-section"><div class="detail-slabel">${esc(cat.progressLabel)}</div><div class="detail-progress">${esc(item.progress)}</div></div>`:''}
     ${item.desc?`<div class="detail-section"><div class="detail-slabel">Description</div><div class="detail-desc">${esc(item.desc)}</div></div>`:''}
   `;
   document.getElementById('detail-actions').innerHTML = `
-    <button class="dbtn dbtn-edit" onclick="openEditModal('${item.id}')">✏ Modifier</button>
+    <button class="dbtn dbtn-edit" onclick="openItemModal('${item.id}')">✏ Modifier</button>
     <button class="dbtn dbtn-del" onclick="deleteItem('${item.id}')">🗑 Supprimer</button>
   `;
   renderGrid();
@@ -836,41 +693,34 @@ function closeDetail() {
   renderGrid();
 }
 
-function setFilter(f) { activeFilter = f; render(); }
+function setFilter(f) { activeFilter=f; render(); }
 
-function render() {
-  renderSidebar();
-  renderTopbar();
-  renderStats();
-  renderGrid();
-}
+function render() { renderSidebar(); renderTopbar(); renderStats(); renderGrid(); }
 
 // ══════════════════════════════════════════
 //  ITEM MODAL
 // ══════════════════════════════════════════
 function openItemModal(editId) {
-  editingItemId = editId || null;
+  editingItemId = editId||null;
   const cat = getActiveCat(); if (!cat) return;
-  document.getElementById('modal-ttl').textContent = editId ? 'Modifier l\'item' : 'Ajouter un item';
-  // Status options
-  document.getElementById('status-lbl').textContent = cat.statusLabel;
+  document.getElementById('modal-ttl').textContent = editId ? "Modifier l'item" : 'Ajouter un item';
+  document.getElementById('status-lbl').textContent   = cat.statusLabel;
   document.getElementById('progress-lbl').textContent = cat.progressLabel;
-  document.getElementById('f-status').innerHTML = cat.statuses.map(s => `<option value="${s}">${s}</option>`).join('');
-  // Fill form
+  document.getElementById('f-status').innerHTML = cat.statuses.map(s=>`<option value="${s}">${s}</option>`).join('');
   if (editId) {
-    const item = items.find(i => i.id === editId);
+    const item = items.find(i=>i.id===editId);
     if (item) {
-      document.getElementById('f-search').value = '';
-      document.getElementById('f-title').value = item.title;
-      document.getElementById('f-owned').value = item.owned || 'owned';
-      document.getElementById('f-status').value = item.status || cat.statuses[0];
-      document.getElementById('f-progress').value = item.progress || '';
-      document.getElementById('f-image').value = item.image || '';
-      document.getElementById('f-desc').value = item.desc || '';
+      document.getElementById('f-search').value   = '';
+      document.getElementById('f-title').value    = item.title;
+      document.getElementById('f-owned').value    = item.owned||'owned';
+      document.getElementById('f-status').value   = item.status||cat.statuses[0];
+      document.getElementById('f-progress').value = item.progress||'';
+      document.getElementById('f-image').value    = item.image||'';
+      document.getElementById('f-desc').value     = item.desc||'';
       updateCoverPreview();
     }
   } else {
-    ['f-search','f-title','f-progress','f-image','f-desc'].forEach(id => document.getElementById(id).value = '');
+    ['f-search','f-title','f-progress','f-image','f-desc'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('f-owned').value = 'owned';
     document.getElementById('cover-prev').innerHTML = '<span style="color:var(--muted2);font-size:12px">Aperçu de la couverture</span>';
   }
@@ -878,7 +728,6 @@ function openItemModal(editId) {
   document.getElementById('item-modal').classList.add('open');
 }
 
-function openEditModal(id) { openItemModal(id); }
 function closeItemModal() {
   document.getElementById('item-modal').classList.remove('open');
   document.getElementById('search-results').className = 'search-results';
@@ -886,137 +735,122 @@ function closeItemModal() {
 
 async function saveItem() {
   const title = document.getElementById('f-title').value.trim();
-  if (!title) { toast('Le titre est obligatoire', 'error'); return; }
+  if (!title) { toast('Le titre est obligatoire','error'); return; }
   const cat = getActiveCat(); if (!cat) return;
   const item = {
-    id: editingItemId || Date.now().toString(),
-    catId: activeCatId,
-    title,
-    owned: document.getElementById('f-owned').value,
-    status: document.getElementById('f-status').value,
+    id: editingItemId||Date.now().toString(),
+    catId: activeCatId, title,
+    owned:    document.getElementById('f-owned').value,
+    status:   document.getElementById('f-status').value,
     progress: document.getElementById('f-progress').value.trim(),
-    image: document.getElementById('f-image').value.trim(),
-    desc: document.getElementById('f-desc').value.trim(),
-    createdAt: editingItemId ? (items.find(i=>i.id===editingItemId)?.createdAt || Date.now()) : Date.now(),
+    image:    document.getElementById('f-image').value.trim(),
+    desc:     document.getElementById('f-desc').value.trim(),
+    createdAt: editingItemId ? (items.find(i=>i.id===editingItemId)?.createdAt||Date.now()) : Date.now(),
     updatedAt: Date.now(),
   };
-  if (editingItemId) {
-    const idx = items.findIndex(i => i.id === editingItemId);
-    if (idx >= 0) items[idx] = item; else items.unshift(item);
-  } else {
-    items.unshift(item);
-  }
+  if (editingItemId) { const idx=items.findIndex(i=>i.id===editingItemId); if(idx>=0)items[idx]=item; else items.unshift(item); }
+  else items.unshift(item);
   await saveItemToDb(item);
   closeItemModal();
-  if (selectedItemId === item.id) selectItem(item.id);
+  if (selectedItemId===item.id) selectItem(item.id);
   render();
-  toast(editingItemId ? 'Item mis à jour ✓' : 'Item ajouté ✓', 'success');
+  toast(editingItemId?'Item mis à jour ✓':'Item ajouté ✓','success');
 }
 
 async function deleteItem(id) {
   if (!confirm('Supprimer cet item ?')) return;
-  items = items.filter(i => i.id !== id);
+  items = items.filter(i=>i.id!==id);
   await deleteItemFromDb(id);
-  closeDetail();
-  render();
-  toast('Item supprimé', 'success');
+  closeDetail(); render();
+  toast('Item supprimé','success');
 }
 
 // ══════════════════════════════════════════
-//  SEARCH / AUTOCOMPLETE
+//  SEARCH AUTOCOMPLETE
 // ══════════════════════════════════════════
 function onSearchInput() {
   clearTimeout(searchTimer);
-  const q = document.getElementById('f-search').value.trim();
+  const q   = document.getElementById('f-search').value.trim();
   const cat = getActiveCat();
-  if (!q || q.length < 2 || !cat) { document.getElementById('search-results').className = 'search-results'; return; }
   const res = document.getElementById('search-results');
+  if (!q||q.length<2||!cat) { res.className='search-results'; return; }
   res.className = 'search-results visible';
   res.innerHTML = '<div class="searching-msg">Recherche en cours…</div>';
   searchTimer = setTimeout(async () => {
-    const results = await searchCovers(q, cat.api || 'none');
-    if (!results.length) {
-      res.innerHTML = '<div class="searching-msg">Aucun résultat. Remplis manuellement ou colle une URL d\'image.</div>';
-      return;
-    }
-    res.innerHTML = results.map((r, i) => `
+    const results = await searchCovers(q, cat.api||'none');
+    if (!results.length) { res.innerHTML='<div class="searching-msg">Aucun résultat. Colle une URL d\'image manuellement.</div>'; return; }
+    res.innerHTML = results.map((r,i)=>`
       <div class="search-result-item" onclick="pickResult(${i})">
-        ${r.cover ? `<img class="sri-cover" src="${r.cover}" onerror="this.style.display='none'">` : `<div class="sri-cover-ph">${cat.icon}</div>`}
+        ${r.cover?`<img class="sri-cover" src="${r.cover}" onerror="this.style.display='none'">`:(`<div class="sri-cover-ph">${cat.icon}</div>`)}
         <div><div class="sri-title">${esc(r.title)}</div><div class="sri-meta">${esc(r.meta||'')}</div></div>
-      </div>
-    `).join('');
+      </div>`).join('');
     res._results = results;
   }, 500);
 }
 
 function pickResult(i) {
   const res = document.getElementById('search-results');
-  const r = res._results?.[i]; if (!r) return;
-  document.getElementById('f-title').value = r.title || '';
-  if (r.cover) {
-    document.getElementById('f-image').value = r.cover;
-    updateCoverPreview();
-  }
+  const r   = res._results?.[i]; if (!r) return;
+  document.getElementById('f-title').value = r.title||'';
+  if (r.cover) { document.getElementById('f-image').value = r.cover; updateCoverPreview(); }
   res.className = 'search-results';
   document.getElementById('f-search').value = '';
 }
 
 function updateCoverPreview() {
-  const url = document.getElementById('f-image').value;
+  const url  = document.getElementById('f-image').value;
   const prev = document.getElementById('cover-prev');
-  if (url) prev.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<span style=color:var(--danger);font-size:12px>URL invalide</span>'">`;
-  else prev.innerHTML = '<span style="color:var(--muted2);font-size:12px">Aperçu de la couverture</span>';
+  if (url) prev.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<span style=color:var(--danger);font-size:12px>URL invalide</span>'">`;
+  else prev.innerHTML='<span style="color:var(--muted2);font-size:12px">Aperçu de la couverture</span>';
 }
 
 // ══════════════════════════════════════════
 //  CATEGORY MODAL
 // ══════════════════════════════════════════
-function openCatModal() { document.getElementById('cat-modal').classList.add('open'); }
+function openCatModal()  { document.getElementById('cat-modal').classList.add('open'); }
 function closeCatModal() {
   document.getElementById('cat-modal').classList.remove('open');
-  ['cat-name','cat-icon','cat-status','cat-progress'].forEach(id => document.getElementById(id).value = '');
+  ['cat-name','cat-icon','cat-status','cat-progress'].forEach(id=>document.getElementById(id).value='');
 }
 
 async function saveCat() {
   const name = document.getElementById('cat-name').value.trim();
-  if (!name) { toast('Le nom est obligatoire', 'error'); return; }
-  const icon = document.getElementById('cat-icon').value.trim() || '📦';
-  const statusLabel = document.getElementById('cat-status').value.trim() || 'Terminé';
-  const progressLabel = document.getElementById('cat-progress').value.trim() || 'Progression';
-  const api = document.getElementById('cat-api').value;
-  const cat = {
-    id: 'cat_' + Date.now(),
-    name, icon, statusLabel, progressLabel, api,
-    statuses: [statusLabel, 'En cours', 'Non ' + statusLabel.toLowerCase(), 'Abandonné'],
-    order: categories.length,
-  };
+  if (!name) { toast('Le nom est obligatoire','error'); return; }
+  const icon          = document.getElementById('cat-icon').value.trim()||'📦';
+  const statusLabel   = document.getElementById('cat-status').value.trim()||'Terminé';
+  const progressLabel = document.getElementById('cat-progress').value.trim()||'Progression';
+  const api           = document.getElementById('cat-api').value;
+  const cat = { id:'cat_'+Date.now(), name, icon, statusLabel, progressLabel, api, statuses:[statusLabel,'En cours','Non '+statusLabel.toLowerCase(),'Abandonné'], order:categories.length };
   categories.push(cat);
   activeCatId = cat.id;
   await saveCatToDb(cat);
-  closeCatModal();
-  render();
-  toast('Catégorie créée ✓', 'success');
+  closeCatModal(); render();
+  toast('Catégorie créée ✓','success');
 }
 
 // ══════════════════════════════════════════
 //  UTILS
 // ══════════════════════════════════════════
 function esc(str) {
-  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function toast(msg, type = 'success') {
-  const c = document.getElementById('toast-container');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
+function toast(msg, type='success') {
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`; t.textContent=msg;
+  c.appendChild(t); setTimeout(()=>t.remove(),3000);
 }
 
-// Close modals on overlay click
-document.getElementById('item-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeItemModal(); });
-document.getElementById('cat-modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeCatModal(); });
+document.getElementById('item-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeItemModal();});
+document.getElementById('cat-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCatModal();});
+
+// Entrée clavier sur la page de connexion
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('auth-screen').style.display !== 'none') handleAuth();
+});
+
+init();
 </script>
 </body>
 </html>
