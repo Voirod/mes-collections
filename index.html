@@ -392,7 +392,18 @@ select.finput{appearance:none;cursor:pointer;}
 //  ⚙️  CONFIG FIREBASE
 //  1. https://console.firebase.google.com
 //  2. Créer projet → appli web → copier firebaseConfig
-//  3. Firestore → créer base en mode "test"
+//  3. Firestore → créer base → RÈGLES à coller :
+//
+//  rules_version = '2';
+//  service cloud.firestore {
+//    match /databases/{database}/documents {
+//      match /users/{userId}/{document=**} {
+//        allow read, write: if true;
+//      }
+//    }
+//  }
+//
+//  ⚠️  En production, remplacer "if true" par une vraie auth.
 // ══════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBvCTNvHnc5PgbKaQ4W1UiRMUM5j9a5KWU",
@@ -426,11 +437,9 @@ let isRegister  = false;
 const CAT_SCAN_ID = '__scan__';
 
 const DEFAULT_CATS = [
-  { id:'games', name:'Jeux vidéo',    icon:'🎮', statusLabel:'Joué',    progressLabel:'Heures de jeu',   api:'game',  hasTomes:false, statuses:['Joué','En cours','Non joué','Abandonné'] },
   { id:'manga', name:'Mangas / BD',   icon:'📚', statusLabel:'Lu',      progressLabel:'Tome / Chapitre', api:'manga', hasTomes:true,  statuses:['Lu','En cours','Non lu','Abandonné'] },
-  { id:'books', name:'Livres',        icon:'📖', statusLabel:'Lu',      progressLabel:'Page',            api:'book',  hasTomes:false, statuses:['Lu','En cours','Non lu','Abandonné'] },
-  { id:'films', name:'Films / Séries',icon:'🎬', statusLabel:'Regardé', progressLabel:'Saison/Épisode',  api:'tmdb',  hasTomes:false, statuses:['Regardé','En cours','Non regardé','Abandonné'] },
-  { id:CAT_SCAN_ID, name:'Scans',     icon:'📡', statusLabel:'',        progressLabel:'Chapitre',        api:'manga', hasTomes:false, statuses:[], isScan:true },
+  { id:'books', name:'Livres',        icon:'📖', statusLabel:'Lu',      progressLabel:'Page',            api:'book',  hasTomes:true,  statuses:['Lu','En cours','Non lu','Abandonné'] },
+  { id:CAT_SCAN_ID, name:'Scan Manga',icon:'📡', statusLabel:'',        progressLabel:'Chapitre',        api:'manga', hasTomes:false, statuses:[], isScan:true },
 ];
 
 // ══════════════════════════════════════════
@@ -517,11 +526,19 @@ async function loadUserData() {
     } else {
       categories = catSnap.docs.map(d=>({id:d.id,...d.data()}));
       categories.sort((a,b)=>(a.order||0)-(b.order||0));
-      if (!categories.find(c=>c.id===CAT_SCAN_ID)) {
-        const scanCat = {...DEFAULT_CATS.find(c=>c.id===CAT_SCAN_ID)};
-        scanCat.order = categories.length;
-        await db.collection('users').doc(uid).collection('categories').doc(CAT_SCAN_ID).set(scanCat);
-        categories.push(scanCat);
+      // Ensure all default categories exist (manga, books, scan)
+      for (const defCat of DEFAULT_CATS) {
+        if (!categories.find(c=>c.id===defCat.id)) {
+          const newCat = {...defCat, order:categories.length};
+          await db.collection('users').doc(uid).collection('categories').doc(defCat.id).set(newCat);
+          categories.push(newCat);
+        }
+      }
+      // Migrate books to hasTomes if needed
+      const booksCat = categories.find(c=>c.id==='books');
+      if (booksCat && !booksCat.hasTomes) {
+        booksCat.hasTomes = true;
+        await db.collection('users').doc(uid).collection('categories').doc('books').set(booksCat);
       }
     }
     const itemSnap = await db.collection('users').doc(uid).collection('items').get();
@@ -533,7 +550,7 @@ async function loadUserData() {
     activeCatId = categories[0]?.id || null;
   } catch(e) {
     console.error('Erreur chargement:', e);
-    toast('Erreur de chargement. Vérifie les règles Firestore.','error');
+    toast('Erreur Firestore : ouvre la console pour voir le détail. Vérifie les règles Firestore (allow read, write: if true).','error');
   }
   document.getElementById('loading').style.display='none';
 }
@@ -756,7 +773,16 @@ function selectItem(id) {
     }).join('');
     tomesHTML = `
       <div class="detail-section">
-        <div class="detail-slabel">Tomes (${item.totalTomes} au total)</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div class="detail-slabel" style="margin-bottom:0">Tomes (${item.totalTomes} au total)</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--muted)">Total:</span>
+            <input type="number" min="1" max="9999" value="${item.totalTomes}"
+              style="width:60px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:3px 6px;color:var(--text);font-size:12px;outline:none;text-align:center"
+              onchange="updateTotalTomes('${id}',this.value)"
+              onclick="this.select()" title="Modifier le nombre total de tomes">
+          </div>
+        </div>
         <div class="tome-stats">
           <div class="tome-stat"><div class="tome-stat-val" style="color:var(--success)">${ownedC}</div><div class="tome-stat-lbl">Possédés</div></div>
           <div class="tome-stat"><div class="tome-stat-val" style="color:var(--accent2)">${readC}</div><div class="tome-stat-lbl">Lus</div></div>
@@ -807,6 +833,20 @@ async function toggleTome(itemId, tomeNum) {
   item.readTomes  = read;
   await saveItemToDb(item);
   selectItem(itemId);
+}
+
+// ── UPDATE TOTAL TOMES ──
+async function updateTotalTomes(itemId, val) {
+  const item = items.find(i=>i.id===itemId); if (!item) return;
+  const newTotal = Math.max(1, parseInt(val)||1);
+  item.totalTomes = newTotal;
+  // Remove owned/read tomes that are now out of range
+  item.ownedTomes = (item.ownedTomes||[]).filter(n=>n<=newTotal);
+  item.readTomes  = (item.readTomes||[]).filter(n=>n<=newTotal);
+  item.updatedAt  = Date.now();
+  await saveItemToDb(item);
+  selectItem(itemId);
+  toast('Total mis à jour ✓','success');
 }
 
 // ── SELECT SCAN ──
@@ -1088,7 +1128,7 @@ async function saveCat() {
   const statusLabel   = document.getElementById('cat-status').value.trim()||'Terminé';
   const progressLabel = document.getElementById('cat-progress').value.trim()||'Progression';
   const api           = document.getElementById('cat-api').value;
-  const hasTomes      = api==='manga';
+  const hasTomes      = api==='manga' || api==='book';
   const cat = { id:'cat_'+Date.now(), name, icon, statusLabel, progressLabel, api, hasTomes, statuses:[statusLabel,'En cours','Non '+statusLabel.toLowerCase(),'Abandonné'], order:categories.length };
   categories.push(cat); activeCatId=cat.id;
   await saveCatToDb(cat);
