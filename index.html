@@ -3,15 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mon Inventaire</title>
+<title>Ohara</title>
 
-<link rel="icon" href="images/Biblioth_que_d'Ohara_Anime_Infobox.png">
+<link rel="icon" href="images/Arbre_de_la_Cognition_Manga_Infobox.png">
 
-<link rel="apple-touch-icon" sizes="512x512" href="images/Biblioth_que_d'Ohara_Anime_Infobox.png">
+<link rel="apple-touch-icon" sizes="512x512" href="images/Arbre_de_la_Cognition_Manga_Infobox.png">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
+  .logo-image-start {
+  width: 250px;
+  height: auto;
+  margin-right: 10px;
+}
   .logo-image {
   width: 50px;
   height: auto;
@@ -281,9 +286,9 @@ select.finput{appearance:none;cursor:pointer;}
 
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-logo">📦</div>
-    <div class="auth-title">Collecto</div>
-    <div class="auth-sub" id="auth-sub">Connecte-toi pour retrouver<br>ta collection sur tous tes appareils.</div>
+    <img src="images/Biblioth_que_d'Ohara_Anime_Infobox.webp" alt="Logo Collecto" class="logo-image-start">
+    <div class="auth-title">OHARA</div>
+    <div class="auth-sub" id="auth-sub">Connecte-toi pour retrouver<br>tes collections sur tous tes appareils.</div>
     <input class="auth-input" id="auth-pseudo" type="text" placeholder="Identifiant" maxlength="30" autocomplete="username">
     <input class="auth-input" id="auth-pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
     <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Se connecter</button>
@@ -296,8 +301,8 @@ select.finput{appearance:none;cursor:pointer;}
 <div class="app">
   <div class="sidebar">
     <div class="sidebar-logo">
-      <img src="images/Fen_treInventaire.webp" alt="Logo Collecto" class="logo-image">
-      <div><div class="logo-text">Mon Inventaire</div><div class="logo-sub">Il y en a du stuff...</div></div>
+      <img src="images/Ohara_fire.png" alt="Logo Collecto" class="logo-image">
+      <div><div class="logo-text">OHARA</div><div class="logo-sub">La culture est un pouvoir</div></div>
     </div>
     <div class="user-pill">
       <div class="user-avatar" id="user-avatar">?</div>
