@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mon Inventaire</title>
-<link rel="icon" type="image/png" href="images/Biblioth_que_d'Ohara_Anime_Infobox.webp">
+
+<link rel="icon" href="images/Biblioth_que_d'Ohara_Anime_Infobox.png">
+
+<link rel="apple-touch-icon" sizes="180x180" href="images/logo-apple.png">
+
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
@@ -823,7 +827,6 @@ async function searchTMDBTv(q) {
       episodes = tvData.number_of_episodes || 0;
       seasonText = ` · ${tvData.number_of_seasons} Saison(s)`;
       
-      // On extrait la liste de toutes les saisons (en excluant la "Saison 0" qui correspond aux bonus)
       seasonsArray = (tvData.seasons || [])
         .filter(s => s.season_number > 0)
         .map(s => ({ s: s.season_number, epCount: s.episode_count }));
@@ -910,7 +913,6 @@ function renderTopbar() {
     const total = items.filter(i=>i.catId===cat.id).length;
     document.getElementById('topbar-sub').textContent = `${total} item${total!==1?'s':''}`;
     
-    // Si c'est une série, on n'affiche pas l'onglet "Possédés"
     let filters = [['all','Tous'],['owned','Possédés'],['inprogress','En cours'],['done','Terminés']];
     if (cat.api === 'tmdb_tv') {
         filters = [['all','Toutes'],['inprogress','En cours'],['done','Terminées']];
@@ -1001,7 +1003,6 @@ function renderMain() {
   grid.innerHTML = its.map(item=>{
     let ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Souhait</span>':'<span class="badge b-notowned">Non possédé</span>';
     
-    // On cache le badge "Possédé" pour les séries
     if (cat.api === 'tmdb_tv') ob = '';
 
     const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}">${item.status}</span>`:'';
@@ -1112,7 +1113,6 @@ function selectItem(id) {
   if (cat.api === 'tmdb_tv') {
       ob = ''; // On cache la possession pour les séries
       
-      // Sécurité si ancienne série convertie
       if ((!item.seasons || item.seasons.length === 0) && item.totalTomes > 0) {
           item.seasons = [{s: 1, epCount: item.totalTomes}];
           item.readEpisodes = { "1": item.readTomes || [] };
@@ -1130,7 +1130,7 @@ function selectItem(id) {
           const epButtons = Array.from({length: season.epCount}, (_, i) => {
               const n = i+1;
               const isRead = sRead.includes(n);
-              const cls = isRead ? 'read' : ''; // Pas de status "possédé"
+              const cls = isRead ? 'read' : ''; 
               return `<button class="tome-btn ${cls}" onclick="toggleEpisode('${id}', ${season.s}, ${n})" title="S${season.s} E${n}">${n}</button>`;
           }).join('');
           
@@ -1434,7 +1434,6 @@ function openItemModal(editId) {
   document.getElementById('progress-lbl').textContent = cat.progressLabel;
   document.getElementById('f-status').innerHTML = cat.statuses.map(s=>`<option value="${s}">${s}</option>`).join('');
   
-  // Affichage conditionnel selon la catégorie
   document.getElementById('owned-wrapper').style.display = cat.api === 'tmdb_tv' ? 'none' : 'block';
   document.getElementById('tomes-row').style.display  = (cat.hasTomes && cat.api !== 'tmdb_tv') ? 'block' : 'none';
   document.getElementById('seasons-row').style.display = cat.api === 'tmdb_tv' ? 'block' : 'none';
@@ -1482,7 +1481,6 @@ async function saveItem() {
   let seasons = existing?.seasons || [];
   let readEpisodes = existing?.readEpisodes || {};
   
-  // On extrait les saisons si c'est une série
   if (cat.api === 'tmdb_tv') {
       seasons = [];
       const rows = document.querySelectorAll('#seasons-container > div');
@@ -1491,7 +1489,7 @@ async function saveItem() {
           const epCount = parseInt(r.querySelector('.season-ep').value)||0;
           if(s > 0 && epCount > 0) seasons.push({s, epCount});
       });
-      totalTomes = seasons.reduce((acc, curr) => acc + curr.epCount, 0); // On met à jour totalTomes pour le tri
+      totalTomes = seasons.reduce((acc, curr) => acc + curr.epCount, 0); 
   }
 
   const item = {
@@ -1656,7 +1654,6 @@ function pickResult(i) {
     document.getElementById('f-tomes').value = r.volumes;
   }
   
-  // Gérer la durée pour les films
   if (cat?.api === 'tmdb_movie' && r.meta) {
       const parts = r.meta.split('·');
       if(parts.length > 1) {
@@ -1664,7 +1661,6 @@ function pickResult(i) {
       }
   }
   
-  // Gérer les saisons pour les séries TV
   if (cat?.api === 'tmdb_tv' && r.seasons) {
       document.getElementById('seasons-container').innerHTML = '';
       r.seasons.forEach(s => addSeasonInput(s.s, s.epCount));
