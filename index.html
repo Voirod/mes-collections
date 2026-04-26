@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Collecto — Ma Collection</title>
+<title>Mon Inventaire</title>
+<link rel="icon" type="image/png" href="images/Biblioth_que_d'Ohara_Anime_Infobox.webp">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
@@ -152,7 +153,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .scan-chap-input{width:60px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:13px;font-weight:600;outline:none;text-align:center;}
 .scan-chap-input:focus{border-color:var(--accent);}
 
-/* TOME GRID */
+/* TOME/EPISODE GRID */
 .tome-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;}
 .tome-btn{width:44px;height:44px;border-radius:8px;border:2px solid var(--border2);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
 .tome-btn.owned{background:rgba(52,211,153,.15);border-color:var(--success);color:var(--success);}
@@ -350,21 +351,34 @@ select.finput{appearance:none;cursor:pointer;}
         <div class="search-results" id="search-results"></div>
       </div>
       <div class="frow"><label class="flabel">Titre *</label><input class="finput" id="f-title" placeholder="Ex: One Piece, Elden Ring…"></div>
+      
       <div class="frow2">
-        <div><label class="flabel">Possession</label>
+        <div id="owned-wrapper">
+          <label class="flabel">Possession</label>
           <select class="finput" id="f-owned">
             <option value="owned">✓ Possédé</option>
             <option value="notowned">✗ Non possédé</option>
             <option value="wishlist">♡ Souhait</option>
           </select>
         </div>
-        <div><label class="flabel" id="status-lbl">Statut</label><select class="finput" id="f-status"></select></div>
+        <div>
+          <label class="flabel" id="status-lbl">Statut</label>
+          <select class="finput" id="f-status"></select>
+        </div>
       </div>
+
       <div class="frow" id="tomes-row" style="display:none">
         <label class="flabel" id="f-tomes-lbl">Total</label>
         <input class="finput" id="f-tomes" type="number" min="1" max="9999" placeholder="Ex: 108">
         <div style="font-size:11px;color:var(--muted);margin-top:5px">💡 Rempli automatiquement si trouvé via la recherche</div>
       </div>
+
+      <div class="frow" id="seasons-row" style="display:none">
+        <label class="flabel">Saisons & Épisodes</label>
+        <div id="seasons-container" style="display:flex; flex-direction:column; gap:6px;"></div>
+        <button type="button" class="btn-cancel" style="padding:6px 12px; margin-top:8px; font-size:12px;" onclick="addSeasonInput()">+ Ajouter une saison</button>
+      </div>
+
       <div class="frow" id="progress-row"><label class="flabel" id="progress-lbl">Progression</label><input class="finput" id="f-progress" placeholder="Ex: 34h…"></div>
       <div class="frow"><label class="flabel">Image (URL)</label><input class="finput" id="f-image" placeholder="https://…" oninput="updateCoverPreview()"><div class="cover-prev" id="cover-prev"><span style="color:var(--muted2);font-size:12px">Aperçu</span></div></div>
       <div class="frow"><label class="flabel">Description</label><textarea class="finput" id="f-desc" placeholder="Notes, avis…"></textarea></div>
@@ -509,7 +523,7 @@ let scanItems   = [];
 let activeCatId = null;
 let editingCatId = null; 
 let activeFilter = 'all';
-let activeSort = 'date_desc'; // Nouvel état pour le tri
+let activeSort = 'date_desc'; 
 let editingItemId = null;
 let editingScanId = null;
 let selectedItemId = null;
@@ -716,16 +730,13 @@ async function moveCat(catId, dir) {
   const newIdx = idx + dir;
   if (newIdx < 0 || newIdx >= categories.length) return;
 
-  // Permutation
   const temp = categories[idx];
   categories[idx] = categories[newIdx];
   categories[newIdx] = temp;
 
-  // Mise à jour de l'ordre
   categories.forEach((c, i) => c.order = i);
   renderSidebar();
 
-  // Sauvegarde Firebase
   await saveCatToDb(categories[idx]);
   await saveCatToDb(categories[newIdx]);
 }
@@ -770,7 +781,6 @@ async function searchTMDBMovie(q) {
   const d = await r.json();
   const results = (d.results || []).slice(0,6).filter(x => x.poster_path);
   
-  // On enrichit les résultats pour récupérer la durée
   return await Promise.all(results.map(async (x) => {
     let runtimeText = '';
     try {
@@ -784,9 +794,8 @@ async function searchTMDBMovie(q) {
     return {
       title: x.title,
       cover: `https://image.tmdb.org/t/p/w300${x.poster_path}`,
-      // On ajoute la durée directement après l'année (ex: "2014 · 169 min")
       meta: (x.release_date || '').slice(0,4) + runtimeText,
-      volumes: 0 // On laisse à 0 car on n'utilise pas la grille à cocher pour les films
+      volumes: 0
     };
   }));
 }
@@ -800,18 +809,26 @@ async function searchTMDBTv(q) {
   return await Promise.all(results.map(async (x) => {
     let episodes = 0;
     let seasonText = '';
+    let seasonsArray = [];
     try {
       const tvRes = await fetch(`https://api.themoviedb.org/3/tv/${x.id}?api_key=${TMDB_KEY}&language=fr-FR`);
       const tvData = await tvRes.json();
       episodes = tvData.number_of_episodes || 0;
       seasonText = ` · ${tvData.number_of_seasons} Saison(s)`;
+      
+      // On extrait la liste de toutes les saisons (en excluant la "Saison 0" qui correspond aux bonus)
+      seasonsArray = (tvData.seasons || [])
+        .filter(s => s.season_number > 0)
+        .map(s => ({ s: s.season_number, epCount: s.episode_count }));
+
     } catch(e) { console.error("Erreur TMDB TV:", e); }
     
     return {
       title: x.name,
       cover: `https://image.tmdb.org/t/p/w300${x.poster_path}`,
       meta: (x.first_air_date || '').slice(0,4) + seasonText,
-      volumes: episodes 
+      volumes: episodes,
+      seasons: seasonsArray
     };
   }));
 }
@@ -823,7 +840,6 @@ async function searchTMDBTv(q) {
 function getActiveCat() { return categories.find(c=>c.id===activeCatId); }
 function isScanMode() { return activeCatId===CAT_SCAN_ID; }
 
-// --- FONCTION UTILITAIRE POUR LES NOMS ---
 function getUnit(api) {
   if (api === 'tmdb_tv' || api === 'tmdb') return { full: 'Épisode', plural: 'Épisodes', short: 'ep.' };
   if (api === 'book') return { full: 'Volume', plural: 'Volumes', short: 'vol.' };
@@ -844,7 +860,7 @@ function renderSidebar() {
     wrap.innerHTML = `
       <button class="nav-item${cat.id===activeCatId?' active':''}" onclick="activeCatId='${cat.id}';activeFilter='all';closeDetail();render()">
         <span class="nav-icon">${cat.icon}</span>
-        <span class="nav-lbl">${cat.name}</span>
+        <span class="nav-lbl" style="${cat.id===activeCatId?'font-weight:bold;':''}">${cat.name}</span>
         <span class="nav-count">${count}</span>
       </button>
       <div class="nav-actions">
@@ -886,7 +902,13 @@ function renderTopbar() {
   } else {
     const total = items.filter(i=>i.catId===cat.id).length;
     document.getElementById('topbar-sub').textContent = `${total} item${total!==1?'s':''}`;
-    const filters = [['all','Tous'],['owned','Possédés'],['inprogress','En cours'],['done','Terminés']];
+    
+    // Si c'est une série, on n'affiche pas l'onglet "Possédés"
+    let filters = [['all','Tous'],['owned','Possédés'],['inprogress','En cours'],['done','Terminés']];
+    if (cat.api === 'tmdb_tv') {
+        filters = [['all','Toutes'],['inprogress','En cours'],['done','Terminées']];
+    }
+    
     document.getElementById('filter-tabs').innerHTML = filters.map(([f,l])=>`<button class="ftab ${activeFilter===f?'active':''}" onclick="setFilter('${f}')">${l}</button>`).join('');
     document.getElementById('main-add-btn').textContent = '＋ Ajouter';
   }
@@ -910,12 +932,19 @@ function renderStats() {
   const owned = all.filter(i=>i.owned==='owned').length;
   const done  = all.filter(i=>i.status===cat.statuses[0]).length;
   const prog  = all.filter(i=>i.status==='En cours').length;
-  document.getElementById('stats-row').innerHTML = `
-    <div class="stat-card"><div class="stat-val">${all.length}</div><div class="stat-lbl">Total</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--success)">${owned}</div><div class="stat-lbl"><span class="stat-dot" style="background:var(--success)"></span>Possédés</div></div>
+  
+  let statsHTML = `<div class="stat-card"><div class="stat-val">${all.length}</div><div class="stat-lbl">Total</div></div>`;
+  
+  if (cat.api !== 'tmdb_tv') {
+      statsHTML += `<div class="stat-card"><div class="stat-val" style="color:var(--success)">${owned}</div><div class="stat-lbl"><span class="stat-dot" style="background:var(--success)"></span>Possédés</div></div>`;
+  }
+  
+  statsHTML += `
     <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">${done}</div><div class="stat-lbl"><span class="stat-dot" style="background:var(--accent2)"></span>${cat.statuses[0]}s</div></div>
     <div class="stat-card"><div class="stat-val" style="color:var(--warning)">${prog}</div><div class="stat-lbl"><span class="stat-dot" style="background:var(--warning)"></span>En cours</div></div>
   `;
+  
+  document.getElementById('stats-row').innerHTML = statsHTML;
 }
 
 function renderMain() {
@@ -938,8 +967,8 @@ function renderMain() {
   // 1. Filtrer
   let its = items.filter(i=>i.catId===cat.id);
   if (q) its = its.filter(i=>i.title.toLowerCase().includes(q));
-  if (activeFilter==='owned')      its = its.filter(i=>i.owned==='owned');
-  if (activeFilter==='notowned')   its = its.filter(i=>i.owned!=='owned');
+  if (activeFilter==='owned' && cat.api !== 'tmdb_tv') its = its.filter(i=>i.owned==='owned');
+  if (activeFilter==='notowned' && cat.api !== 'tmdb_tv') its = its.filter(i=>i.owned!=='owned');
   if (activeFilter==='done')       its = its.filter(i=>i.status===cat.statuses[0]);
   if (activeFilter==='inprogress') its = its.filter(i=>i.status==='En cours');
 
@@ -963,11 +992,25 @@ function renderMain() {
   }
   grid.className='grid';
   grid.innerHTML = its.map(item=>{
-    const ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Souhait</span>':'<span class="badge b-notowned">Non possédé</span>';
+    let ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Souhait</span>':'<span class="badge b-notowned">Non possédé</span>';
+    
+    // On cache le badge "Possédé" pour les séries
+    if (cat.api === 'tmdb_tv') ob = '';
+
     const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}">${item.status}</span>`:'';
     let tomeBadge = '';
     
-    if (cat.hasTomes && item.totalTomes>0) {
+    if (cat.api === 'tmdb_tv') {
+        const seasons = item.seasons || [];
+        const readEps = item.readEpisodes || {};
+        let tEps = 0; let rCount = 0;
+        seasons.forEach(s => {
+            tEps += s.epCount;
+            rCount += (readEps[s.s] || []).length;
+        });
+        if (tEps > 0) tomeBadge = `<span class="badge b-scan">${rCount}/${tEps} ep.</span>`;
+    } 
+    else if (cat.hasTomes && item.totalTomes>0) {
       const ownedCount = (item.ownedTomes||[]).length;
       const unit = getUnit(cat.api);
       tomeBadge = `<span class="badge b-scan">${ownedCount}/${item.totalTomes} ${unit.short}</span>`;
@@ -1042,7 +1085,7 @@ function renderScanGrid() {
   }).join('');
 }
 
-// ── SELECT ITEM (manga/jeux etc.) ──
+// ── SELECT ITEM ──
 function selectItem(id) {
   selectedItemId = id;
   const item = items.find(i=>i.id===id);
@@ -1053,11 +1096,77 @@ function selectItem(id) {
     ?`<img class="detail-cover" src="${item.image}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="detail-cover-ph" style="display:none">${cat.icon}</div>`
     :`<div class="detail-cover-ph">${cat.icon}</div>`;
 
-  const ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Liste de souhaits</span>':'<span class="badge b-notowned">Non possédé</span>';
+  let ob = item.owned==='owned'?'<span class="badge b-owned">Possédé</span>':item.owned==='wishlist'?'<span class="badge b-wish">Liste de souhaits</span>':'<span class="badge b-notowned">Non possédé</span>';
   const sb = item.status?`<span class="badge ${item.status==='En cours'?'b-prog':item.status===cat.statuses[0]?'b-done':'b-not'}" style="padding:3px 9px">${item.status}</span>`:'';
 
   let tomesHTML = '';
-  if (cat.hasTomes && item.totalTomes>0) {
+  
+  // ── LOGIQUE SPECIFIQUE SERIES TV ──
+  if (cat.api === 'tmdb_tv') {
+      ob = ''; // On cache la possession pour les séries
+      
+      // Sécurité si ancienne série convertie
+      if ((!item.seasons || item.seasons.length === 0) && item.totalTomes > 0) {
+          item.seasons = [{s: 1, epCount: item.totalTomes}];
+          item.readEpisodes = { "1": item.readTomes || [] };
+      }
+      
+      const seasons = item.seasons || [];
+      const readEps = item.readEpisodes || {};
+      let totalEps = 0; let readCount = 0;
+      
+      let seasonsHTML = seasons.map(season => {
+          totalEps += season.epCount;
+          const sRead = readEps[season.s] || [];
+          readCount += sRead.length;
+          
+          const epButtons = Array.from({length: season.epCount}, (_, i) => {
+              const n = i+1;
+              const isRead = sRead.includes(n);
+              const cls = isRead ? 'read' : ''; // Pas de status "possédé"
+              return `<button class="tome-btn ${cls}" onclick="toggleEpisode('${id}', ${season.s}, ${n})" title="S${season.s} E${n}">${n}</button>`;
+          }).join('');
+          
+          return `
+              <div style="margin-top:16px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                      <div class="detail-slabel" style="margin-bottom:0">Saison ${season.s} <span style="text-transform:none; color:var(--muted); font-weight:normal">(${season.epCount} ép.)</span></div>
+                      <button class="tome-bulk-btn" onclick="bulkSeason('${id}', ${season.s}, ${season.epCount})">👁 Tout vu</button>
+                  </div>
+                  <div class="tome-grid">${epButtons}</div>
+              </div>
+          `;
+      }).join('');
+      
+      const pct = totalEps > 0 ? Math.round((readCount/totalEps)*100) : 0;
+      
+      tomesHTML = `
+      <div class="detail-section">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <div class="detail-slabel" style="margin-bottom:0">Épisodes (${totalEps} au total)</div>
+          </div>
+          <div class="tome-stats">
+              <div class="tome-stat"><div class="tome-stat-val" style="color:var(--accent2)">${readCount}</div><div class="tome-stat-lbl">Vus</div></div>
+              <div class="tome-stat"><div class="tome-stat-val">${totalEps - readCount}</div><div class="tome-stat-lbl">Restants</div></div>
+          </div>
+          <div class="tome-progress-bar"><div class="tome-progress-fill" style="width:${pct}%"></div></div>
+          
+          <div class="tome-legend">
+              <div class="tome-legend-item"><div class="tome-legend-dot" style="background:rgba(124,107,250,.4);border:2px solid var(--accent2)"></div>Vu</div>
+              <div class="tome-legend-item"><div class="tome-legend-dot" style="background:var(--surface3);border:2px solid var(--border2)"></div>Non vu</div>
+          </div>
+          
+          <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap">
+              <button class="tome-bulk-btn" onclick="bulkAllSeries('${id}', true)">👁 Toute la série vue</button>
+              <button class="tome-bulk-btn" onclick="bulkAllSeries('${id}', false)">✕ Vider la série</button>
+          </div>
+
+          ${seasonsHTML}
+      </div>`;
+      
+  } 
+  // ── LOGIQUE CLASSIQUE MANGAS / LIVRES ──
+  else if (cat.hasTomes && item.totalTomes>0) {
     const owned  = item.ownedTomes||[];
     const read   = item.readTomes||[];
     const ownedC = owned.length;
@@ -1116,7 +1225,7 @@ function selectItem(id) {
   document.getElementById('detail-body').innerHTML = `
     <div class="detail-title">${esc(item.title)}</div>
     <div class="detail-cat">${cat.icon} ${cat.name}</div>
-    <div class="detail-section"><div class="detail-slabel">Statut</div><div style="display:flex;gap:6px;flex-wrap:wrap">${ob}${sb}</div></div>
+    <div class="detail-section" style="${ob===''&&!sb?'display:none;':''}"><div class="detail-slabel">Statut</div><div style="display:flex;gap:6px;flex-wrap:wrap">${ob}${sb}</div></div>
     ${item.progress?`<div class="detail-section"><div class="detail-slabel">${esc(cat.progressLabel)}</div><div class="detail-progress">${esc(item.progress)}</div></div>`:''}
     ${tomesHTML}
     ${item.desc?`<div class="detail-section"><div class="detail-slabel">Description</div><div class="detail-desc">${esc(item.desc)}</div></div>`:''}
@@ -1128,7 +1237,56 @@ function selectItem(id) {
   renderMain();
 }
 
-// ── TOGGLE TOME (Possédé -> Lu -> Les Deux -> Reset) ──
+// ── TOGGLES SPECIFIQUES SERIES ──
+async function toggleEpisode(itemId, seasonNum, epNum) {
+    const item = items.find(i=>i.id===itemId); if (!item) return;
+    if(!item.readEpisodes) item.readEpisodes = {};
+    const sRead = [...(item.readEpisodes[seasonNum] || [])];
+    
+    const idx = sRead.indexOf(epNum);
+    if (idx >= 0) sRead.splice(idx, 1);
+    else { sRead.push(epNum); sRead.sort((a,b)=>a-b); }
+    
+    item.readEpisodes[seasonNum] = sRead;
+    item.updatedAt = Date.now();
+    await saveItemToDb(item);
+    selectItem(itemId);
+}
+
+async function bulkSeason(itemId, seasonNum, totalEp) {
+    const item = items.find(i=>i.id===itemId); if (!item) return;
+    if(!item.readEpisodes) item.readEpisodes = {};
+    
+    const sRead = item.readEpisodes[seasonNum] || [];
+    if (sRead.length === totalEp) {
+        item.readEpisodes[seasonNum] = []; // On vide si c'était déjà plein
+    } else {
+        item.readEpisodes[seasonNum] = Array.from({length: totalEp}, (_, i) => i + 1);
+    }
+    
+    item.updatedAt = Date.now();
+    await saveItemToDb(item);
+    selectItem(itemId);
+}
+
+async function bulkAllSeries(itemId, isRead) {
+    const item = items.find(i=>i.id===itemId); if (!item) return;
+    if(!item.readEpisodes) item.readEpisodes = {};
+    
+    if (isRead) {
+        (item.seasons||[]).forEach(s => {
+            item.readEpisodes[s.s] = Array.from({length: s.epCount}, (_, i) => i + 1);
+        });
+    } else {
+        item.readEpisodes = {};
+    }
+    
+    item.updatedAt = Date.now();
+    await saveItemToDb(item);
+    selectItem(itemId);
+}
+
+// ── TOGGLE TOME CLASSIQUE ──
 async function toggleTome(itemId, tomeNum) {
   const item = items.find(i=>i.id===itemId); if (!item) return;
   const owned = [...(item.ownedTomes||[])];
@@ -1154,11 +1312,10 @@ async function toggleTome(itemId, tomeNum) {
   selectItem(itemId);
 }
 
-// ── BULK TOMES (Actions Rapides) ──
+// ── BULK TOMES CLASSIQUE ──
 async function bulkTomes(itemId, action) {
   const item = items.find(i=>i.id===itemId); if (!item) return;
   
-  // Créer un tableau contenant tous les numéros [1, 2, 3, ..., totalTomes]
   const allArr = Array.from({length: item.totalTomes}, (_, i) => i + 1);
 
   if (action === 'owned') {
@@ -1178,7 +1335,7 @@ async function bulkTomes(itemId, action) {
   selectItem(itemId);
 }
 
-// ── UPDATE TOTAL TOMES ──
+// ── UPDATE TOTAL TOMES CLASSIQUE ──
 async function updateTotalTomes(itemId, val) {
   const item = items.find(i=>i.id===itemId); if (!item) return;
   const newTotal = Math.max(1, parseInt(val)||1);
@@ -1245,6 +1402,19 @@ function render() { renderSidebar(); renderTopbar(); renderStats(); renderMain()
 // ══════════════════════════════════════════
 //  ITEM MODAL
 // ══════════════════════════════════════════
+function addSeasonInput(sNum = '', epCount = '') {
+    const c = document.getElementById('seasons-container');
+    const idx = c.children.length + 1;
+    const div = document.createElement('div');
+    div.style.display = 'flex'; div.style.gap = '6px';
+    div.innerHTML = `
+        <input class="finput season-s" type="number" placeholder="Saison" value="${sNum || idx}" style="width:80px">
+        <input class="finput season-ep" type="number" placeholder="Nb épisodes" value="${epCount}">
+        <button type="button" class="btn-cancel" style="padding:4px 8px; color:var(--danger); border-color:var(--danger)" onclick="this.parentNode.remove()">✕</button>
+    `;
+    c.appendChild(div);
+}
+
 function openItemModal(editId) {
   editingItemId = editId||null;
   const cat = getActiveCat(); if (!cat||cat.isScan) return;
@@ -1256,8 +1426,15 @@ function openItemModal(editId) {
   document.getElementById('status-lbl').textContent   = cat.statusLabel;
   document.getElementById('progress-lbl').textContent = cat.progressLabel;
   document.getElementById('f-status').innerHTML = cat.statuses.map(s=>`<option value="${s}">${s}</option>`).join('');
-  document.getElementById('tomes-row').style.display  = cat.hasTomes ? 'block' : 'none';
+  
+  // Affichage conditionnel selon la catégorie
+  document.getElementById('owned-wrapper').style.display = cat.api === 'tmdb_tv' ? 'none' : 'block';
+  document.getElementById('tomes-row').style.display  = (cat.hasTomes && cat.api !== 'tmdb_tv') ? 'block' : 'none';
+  document.getElementById('seasons-row').style.display = cat.api === 'tmdb_tv' ? 'block' : 'none';
   document.getElementById('progress-row').style.display = cat.hasTomes ? 'none' : 'block';
+  
+  document.getElementById('seasons-container').innerHTML = '';
+
   if (editId) {
     const item = items.find(i=>i.id===editId);
     if (item) {
@@ -1270,6 +1447,10 @@ function openItemModal(editId) {
       document.getElementById('f-image').value    = item.image||'';
       document.getElementById('f-desc').value     = item.desc||'';
       updateCoverPreview();
+      
+      if (cat.api === 'tmdb_tv' && item.seasons) {
+          item.seasons.forEach(s => addSeasonInput(s.s, s.epCount));
+      }
     }
   } else {
     ['f-search','f-title','f-progress','f-image','f-desc','f-tomes'].forEach(id=>document.getElementById(id).value='');
@@ -1283,12 +1464,29 @@ function closeItemModal() {
   document.getElementById('item-modal').classList.remove('open');
   document.getElementById('search-results').className='search-results';
 }
+
 async function saveItem() {
   const title = document.getElementById('f-title').value.trim();
   if (!title) { toast('Le titre est obligatoire','error'); return; }
   const cat = getActiveCat(); if (!cat) return;
-  const totalTomes = parseInt(document.getElementById('f-tomes').value)||0;
+  
   const existing = editingItemId ? items.find(i=>i.id===editingItemId) : null;
+  let totalTomes = parseInt(document.getElementById('f-tomes').value)||0;
+  let seasons = existing?.seasons || [];
+  let readEpisodes = existing?.readEpisodes || {};
+  
+  // On extrait les saisons si c'est une série
+  if (cat.api === 'tmdb_tv') {
+      seasons = [];
+      const rows = document.querySelectorAll('#seasons-container > div');
+      rows.forEach(r => {
+          const s = parseInt(r.querySelector('.season-s').value)||0;
+          const epCount = parseInt(r.querySelector('.season-ep').value)||0;
+          if(s > 0 && epCount > 0) seasons.push({s, epCount});
+      });
+      totalTomes = seasons.reduce((acc, curr) => acc + curr.epCount, 0); // On met à jour totalTomes pour le tri
+  }
+
   const item = {
     id: editingItemId||Date.now().toString(),
     catId: activeCatId, title,
@@ -1298,11 +1496,14 @@ async function saveItem() {
     image:    document.getElementById('f-image').value.trim(),
     desc:     document.getElementById('f-desc').value.trim(),
     totalTomes,
+    seasons,
+    readEpisodes,
     ownedTomes: existing?.ownedTomes||[],
     readTomes:  existing?.readTomes||[],
     createdAt: existing?.createdAt||Date.now(),
     updatedAt: Date.now(),
   };
+  
   if (editingItemId) { const idx=items.findIndex(i=>i.id===editingItemId); if(idx>=0)items[idx]=item; else items.unshift(item); }
   else items.unshift(item);
   await saveItemToDb(item);
@@ -1448,13 +1649,18 @@ function pickResult(i) {
     document.getElementById('f-tomes').value = r.volumes;
   }
   
-  // NOUVEAU : Pré-remplir la progression avec la durée pour les films
+  // Gérer la durée pour les films
   if (cat?.api === 'tmdb_movie' && r.meta) {
-      // Ex r.meta: "2014 · 169 min" -> On extrait ce qui est après le point
       const parts = r.meta.split('·');
       if(parts.length > 1) {
           document.getElementById('f-progress').value = parts[1].trim();
       }
+  }
+  
+  // Gérer les saisons pour les séries TV
+  if (cat?.api === 'tmdb_tv' && r.seasons) {
+      document.getElementById('seasons-container').innerHTML = '';
+      r.seasons.forEach(s => addSeasonInput(s.s, s.epCount));
   }
 
   res.className='search-results'; 
