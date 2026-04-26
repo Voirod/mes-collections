@@ -248,9 +248,16 @@ select.finput{appearance:none;cursor:pointer;}
 @media(max-width:700px){
   .sidebar{width:56px;}
   .logo-text,.logo-sub,.nav-item .nav-lbl,.nav-count,.add-cat-btn span:not(:first-child),.user-name{display:none;}
-  .user-pill{padding:6px;justify-content:center;}
-  .user-actions{flex-direction:column; gap:2px;}
-  .sidebar-logo{padding:12px 8px;justify-content:center;}
+  
+  /* --- CORRECTIONS D'ALIGNEMENT MOBILE --- */
+  .sidebar-logo{padding:12px 4px; justify-content:center;}
+  .logo-image{margin-right:0; width:34px;} /* On centre et rétrécit le logo principal */
+  
+  .user-pill{flex-direction:column; padding:10px 4px; gap:10px;} /* On empile l'avatar et les boutons */
+  .user-actions{flex-direction:column; align-items:center; gap:8px !important;}
+  .user-logout{padding:6px; font-size:16px;} /* On grossit un peu les boutons pour le tactile */
+  /* --------------------------------------- */
+
   .detail-panel.open{position:fixed;inset:0;width:100%;z-index:50;}
   .search-box{display:none;}
   .topbar{padding:10px 14px;}
