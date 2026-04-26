@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,18 +13,30 @@
   margin-right: 10px;
 }
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-:root {
+
+/* THEME SOMBRE (Défaut) */
+:root, [data-theme="dark"] {
   --bg:#0f0f13; --surface:#18181f; --surface2:#1e1e28; --surface3:#25252f;
   --accent:#7c6bfa; --accent2:#a78bfa; --border:rgba(255,255,255,0.08);
   --border2:rgba(255,255,255,0.14); --text:#e8e6f0; --muted:#8b8a9e;
   --muted2:#5e5d70; --success:#34d399; --warning:#fbbf24;
   --danger:#f87171; --radius:10px; --radius-lg:14px;
 }
+
+/* THEME CLAIR */
+[data-theme="light"] {
+  --bg:#f9fafb; --surface:#ffffff; --surface2:#f3f4f6; --surface3:#e5e7eb;
+  --accent:#6d28d9; --accent2:#8b5cf6; --border:rgba(0,0,0,0.08);
+  --border2:rgba(0,0,0,0.15); --text:#1f2937; --muted:#6b7280;
+  --muted2:#9ca3af; --success:#10b981; --warning:#f59e0b;
+  --danger:#ef4444; 
+}
+
 html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;}
 
 /* AUTH */
 #auth-screen{display:flex;align-items:center;justify-content:center;height:100vh;}
-.auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:40px 36px;width:360px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.auth-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);padding:40px 36px;width:360px;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.15);}
 .auth-logo{font-size:40px;margin-bottom:10px;}
 .auth-title{font-size:22px;font-weight:700;margin-bottom:6px;}
 .auth-sub{font-size:13px;color:var(--muted);margin-bottom:26px;line-height:1.5;}
@@ -42,49 +54,59 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .app{display:flex;height:100%;overflow:hidden;}
 
 /* SIDEBAR */
-.sidebar{width:230px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar{width:260px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;}
 .sidebar-logo{padding:18px 16px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
 .logo-icon{font-size:22px;}
 .logo-text{font-size:16px;font-weight:700;}
 .logo-sub{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:1px;}
 .user-pill{margin:10px 10px 0;padding:8px 10px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;gap:8px;border:1px solid var(--border);}
-.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff;}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:#fff;overflow:hidden;}
 .user-name{font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.user-logout{font-size:13px;color:var(--muted);cursor:pointer;padding:2px 4px;border-radius:4px;flex-shrink:0;}
-.user-logout:hover{color:var(--danger);}
+.user-logout{font-size:13px;color:var(--muted);cursor:pointer;padding:4px 6px;border-radius:6px;flex-shrink:0;transition:all .15s;}
+.user-logout:hover{background:var(--surface3);color:var(--text);}
+.user-logout.danger-icon:hover{color:var(--danger);}
 .sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto;}
 .nav-label{font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;padding:8px 8px 4px;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;color:var(--muted);margin-bottom:2px;transition:all .15s;border:none;background:none;width:100%;text-align:left;}
+
+.nav-item-wrap{display:flex;align-items:center;gap:3px;margin-bottom:2px;position:relative;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;color:var(--muted);transition:all .15s;border:none;background:none;flex:1;text-align:left;}
 .nav-item:hover{background:var(--surface2);color:var(--text);}
 .nav-item.active{background:rgba(124,107,250,.15);color:var(--accent2);}
 .nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center;}
 .nav-count{margin-left:auto;font-size:11px;background:var(--surface3);color:var(--muted);padding:1px 7px;border-radius:20px;}
+
+.nav-actions{display:none; align-items:center; gap:2px; flex-shrink:0;}
+.nav-item-wrap:hover .nav-actions{display:flex;}
+.nav-act-btn{width:22px; height:22px; border-radius:4px; border:none; background:none; color:var(--muted2); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; padding:0;}
+.nav-act-btn:hover{background:var(--surface3); color:var(--text);}
+.nav-act-btn.danger:hover{background:rgba(239,68,68,.15); color:var(--danger);}
+.nav-act-btn.accent:hover{background:rgba(124,107,250,.15); color:var(--accent2);}
+
 .sidebar-footer{padding:10px 8px;border-top:1px solid var(--border);}
 .add-cat-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);background:none;border:1px dashed var(--border2);width:100%;transition:all .15s;}
 .add-cat-btn:hover{color:var(--accent2);border-color:var(--accent);}
-.nav-item-wrap{display:flex;align-items:center;gap:3px;margin-bottom:2px;}
-.nav-item-wrap .nav-item{margin-bottom:0;flex:1;}
-.nav-del-btn{flex-shrink:0;width:24px;height:24px;border-radius:6px;border:none;background:none;color:var(--muted2);font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .15s;padding:0;}
-.nav-edit-btn {flex-shrink:0; width:24px; height:24px; border-radius:6px; border:none; background:none; color:var(--muted2); font-size:11px; cursor:pointer; display:none; align-items:center; justify-content:center; transition:all .15s; padding:0;}
-.nav-item-wrap:hover .nav-del-btn, .nav-item-wrap:hover .nav-edit-btn {display:flex;}
-.nav-del-btn:hover{background:rgba(248,113,113,.15);color:var(--danger);}
-.nav-edit-btn:hover {background:rgba(124,107,250,.15); color:var(--accent2);}
 
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
 .topbar{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--bg);flex-wrap:wrap;}
-.topbar-info{flex:1;min-width:120px;}
-.topbar-title{font-size:18px;font-weight:700;}
+.topbar-info{min-width:120px;}
+.topbar-title{font-size:18px;font-weight:700;color:var(--text);}
 .topbar-sub{font-size:12px;color:var(--muted);margin-top:1px;}
 .search-box{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 12px;}
 .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:160px;}
 .search-box input::placeholder{color:var(--muted2);}
-.filter-tabs{display:flex;gap:4px;flex-wrap:wrap;}
-.ftab{padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;border:none;background:var(--surface);color:var(--muted);transition:all .15s;}
+
+/* LAYOUT TOPBAR */
+.filter-tabs{display:flex;gap:6px;flex-wrap:wrap;flex:1;align-items:center;}
+.ftab{padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;border:none;background:var(--surface);color:var(--muted);transition:all .15s; height: 32px;}
 .ftab.active{background:rgba(124,107,250,.2);color:var(--accent2);}
 .ftab:hover:not(.active){background:var(--surface2);color:var(--text);}
-.add-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.sort-select { background:var(--surface); border:1px solid var(--border); color:var(--muted); border-radius:8px; padding:0 12px; font-size:12px; outline:none; cursor:pointer; transition:all .15s; height: 32px; }
+.sort-select:hover { background:var(--surface2); color:var(--text); }
+
+.add-btn{display:flex;align-items:center;gap:6px;padding:0 16px; height: 32px; border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;flex-shrink:0;}
 .add-btn:hover{background:var(--accent2);transform:translateY(-1px);}
+
 .content{flex:1;overflow-y:auto;padding:18px 22px;}
 .stats-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;flex:1;min-width:80px;}
@@ -95,7 +117,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 /* GRID */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px;}
 .item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all .2s;}
-.item-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.35);}
+.item-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.15);}
 .item-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
 .item-cover{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:var(--surface2);}
 .item-cover-ph{width:100%;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:var(--surface2);font-size:48px;color:var(--muted2);}
@@ -104,18 +126,18 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .item-meta{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
 .badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
-.b-owned{background:rgba(52,211,153,.12);color:#34d399;}
-.b-notowned{background:rgba(248,113,113,.1);color:#f87171;}
-.b-wish{background:rgba(251,191,36,.1);color:#fbbf24;}
-.b-done{background:rgba(124,107,250,.15);color:#a78bfa;}
-.b-prog{background:rgba(251,191,36,.1);color:#fbbf24;}
-.b-not{background:rgba(255,255,255,.06);color:var(--muted);}
+.b-owned{background:rgba(52,211,153,.12);color:var(--success);}
+.b-notowned{background:rgba(239,68,68,.1);color:var(--danger);}
+.b-wish{background:rgba(245,158,11,.1);color:var(--warning);}
+.b-done{background:rgba(139,92,246,.15);color:var(--accent2);}
+.b-prog{background:rgba(245,158,11,.1);color:var(--warning);}
+.b-not{background:rgba(107,114,128,.1);color:var(--muted);}
 .b-scan{background:rgba(96,165,250,.12);color:#60a5fa;}
 
 /* SCAN GRID */
 .scan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
 .scan-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all .2s;display:flex;}
-.scan-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.3);}
+.scan-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,.15);}
 .scan-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
 .scan-cover{width:70px;height:100px;object-fit:cover;flex-shrink:0;background:var(--surface2);}
 .scan-cover-ph{width:70px;height:100px;flex-shrink:0;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--muted2);}
@@ -130,12 +152,12 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .scan-chap-input{width:60px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:13px;font-weight:600;outline:none;text-align:center;}
 .scan-chap-input:focus{border-color:var(--accent);}
 
-/* TOME GRID (dans detail panel manga) */
-.tome-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;margin-top:8px;}
+/* TOME GRID */
+.tome-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;}
 .tome-btn{width:44px;height:44px;border-radius:8px;border:2px solid var(--border2);background:var(--surface2);color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
-.tome-btn.owned{background:rgba(52,211,153,.15);border-color:#34d399;color:#34d399;}
+.tome-btn.owned{background:rgba(52,211,153,.15);border-color:var(--success);color:var(--success);}
 .tome-btn.read{background:rgba(124,107,250,.2);border-color:var(--accent2);color:var(--accent2);}
-.tome-btn.both{background:linear-gradient(135deg,rgba(52,211,153,.15) 50%,rgba(124,107,250,.2) 50%);border-color:#34d399;border-right-color:var(--accent2);border-bottom-color:var(--accent2);color:var(--text);}
+.tome-btn.both{background:linear-gradient(135deg,rgba(52,211,153,.15) 50%,rgba(124,107,250,.2) 50%);border-color:var(--success);border-right-color:var(--accent2);border-bottom-color:var(--accent2);color:var(--text);}
 .tome-btn:hover{border-color:var(--accent);color:var(--accent2);}
 .tome-legend{display:flex;gap:14px;margin-bottom:8px;flex-wrap:wrap;}
 .tome-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
@@ -146,6 +168,8 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .tome-stat{flex:1;background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center;}
 .tome-stat-val{font-size:17px;font-weight:700;}
 .tome-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.tome-bulk-btn{padding:5px 8px; border-radius:6px; background:var(--surface2); border:1px solid var(--border2); color:var(--muted); font-size:10px; cursor:pointer; font-weight:600; transition:all .15s;}
+.tome-bulk-btn:hover{color:var(--text); border-color:var(--accent); background:var(--surface3);}
 
 /* DETAIL PANEL */
 .detail-panel{width:360px;background:var(--surface);border-left:1px solid var(--border);display:none;flex-direction:column;flex-shrink:0;overflow:hidden;}
@@ -165,8 +189,8 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .dbtn{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;text-align:center;border:none;}
 .dbtn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
 .dbtn-edit:hover{border-color:var(--accent);color:var(--accent2);}
-.dbtn-del{background:rgba(248,113,113,.08);color:var(--danger);border:1px solid rgba(248,113,113,.2);}
-.dbtn-del:hover{background:rgba(248,113,113,.15);}
+.dbtn-del{background:rgba(239,68,68,.08);color:var(--danger);border:1px solid rgba(239,68,68,.2);}
+.dbtn-del:hover{background:rgba(239,68,68,.15);}
 
 .empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);}
 .empty .eicon{font-size:52px;margin-bottom:14px;}
@@ -181,7 +205,7 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.6);}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.2);}
 .modal-hdr{padding:18px 22px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1;}
 .modal-ttl{font-size:15px;font-weight:700;}
 .modal-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:4px;border-radius:6px;line-height:1;}
@@ -222,8 +246,9 @@ select.finput{appearance:none;cursor:pointer;}
 
 @media(max-width:700px){
   .sidebar{width:56px;}
-  .logo-text,.logo-sub,.nav-item .nav-lbl,.nav-count,.add-cat-btn span:not(:first-child),.user-name,.user-logout{display:none;}
+  .logo-text,.logo-sub,.nav-item .nav-lbl,.nav-count,.add-cat-btn span:not(:first-child),.user-name{display:none;}
   .user-pill{padding:6px;justify-content:center;}
+  .user-actions{flex-direction:column; gap:2px;}
   .sidebar-logo{padding:12px 8px;justify-content:center;}
   .detail-panel.open{position:fixed;inset:0;width:100%;z-index:50;}
   .search-box{display:none;}
@@ -247,7 +272,7 @@ select.finput{appearance:none;cursor:pointer;}
     <div class="auth-logo">📦</div>
     <div class="auth-title">Collecto</div>
     <div class="auth-sub" id="auth-sub">Connecte-toi pour retrouver<br>ta collection sur tous tes appareils.</div>
-    <input class="auth-input" id="auth-pseudo" type="text" placeholder="Pseudo" maxlength="30" autocomplete="username">
+    <input class="auth-input" id="auth-pseudo" type="text" placeholder="Identifiant" maxlength="30" autocomplete="username">
     <input class="auth-input" id="auth-pass" type="password" placeholder="Mot de passe" autocomplete="current-password">
     <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Se connecter</button>
     <div class="auth-error" id="auth-error"></div>
@@ -265,7 +290,10 @@ select.finput{appearance:none;cursor:pointer;}
     <div class="user-pill">
       <div class="user-avatar" id="user-avatar">?</div>
       <div class="user-name" id="user-name">Utilisateur</div>
-      <div class="user-logout" onclick="logout()" title="Se déconnecter">↪</div>
+      <div class="user-actions" style="display:flex; gap:2px; flex-shrink:0">
+        <div class="user-logout" onclick="openSettingsModal()" title="Paramètres">⚙️</div>
+        <div class="user-logout danger-icon" onclick="logout()" title="Se déconnecter">↪</div>
+      </div>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav"><div class="nav-label">Catégories</div></nav>
     <div class="sidebar-footer">
@@ -279,13 +307,19 @@ select.finput{appearance:none;cursor:pointer;}
         <div class="topbar-title" id="topbar-title">Ma collection</div>
         <div class="topbar-sub" id="topbar-sub"></div>
       </div>
+      
+      <div class="filter-tabs" id="filter-tabs"></div>
+      
       <div class="search-box">
         <span style="color:var(--muted)">⌕</span>
         <input type="text" placeholder="Rechercher…" id="search-input" oninput="renderMain()">
       </div>
-      <div class="filter-tabs" id="filter-tabs"></div>
+      
+      <div id="sort-container" style="display:none;"></div>
+      
       <button class="add-btn" id="main-add-btn" onclick="handleAddBtn()">＋ Ajouter</button>
     </div>
+    
     <div class="content" id="main-content">
       <div class="stats-row" id="stats-row"></div>
       <div id="items-grid"></div>
@@ -407,6 +441,23 @@ select.finput{appearance:none;cursor:pointer;}
   </div>
 </div>
 
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-ttl">Paramètres du profil</div><button class="modal-x" onclick="closeSettingsModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="frow"><label class="flabel">Pseudo affiché</label><input class="finput" id="set-display" placeholder="Ex: Grand Collectionneur"></div>
+      <div class="frow"><label class="flabel">URL de l'avatar (optionnel)</label><input class="finput" id="set-avatar" placeholder="https://..."></div>
+      <div class="frow"><label class="flabel">Apparence de l'application</label>
+        <select class="finput" id="set-theme">
+          <option value="dark">🌙 Thème Sombre</option>
+          <option value="light">☀️ Thème Clair</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-ftr"><button class="btn-cancel" onclick="closeSettingsModal()">Annuler</button><button class="btn-save" onclick="saveSettings()">Enregistrer</button></div>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 
 <div id="firestore-helper" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center;padding:20px">
@@ -458,6 +509,7 @@ let scanItems   = [];
 let activeCatId = null;
 let editingCatId = null; 
 let activeFilter = 'all';
+let activeSort = 'date_desc'; // Nouvel état pour le tri
 let editingItemId = null;
 let editingScanId = null;
 let selectedItemId = null;
@@ -469,7 +521,7 @@ const CAT_SCAN_ID = '__scan__';
 const DEFAULT_CATS = [];
 
 // ══════════════════════════════════════════
-//  AUTH
+//  AUTH & SETTINGS
 // ══════════════════════════════════════════
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -483,47 +535,113 @@ function switchMode() {
   document.getElementById('auth-error').textContent = '';
 }
 function setAuthError(msg) { document.getElementById('auth-error').textContent = msg; }
+
 async function handleAuth() {
   const pseudo = document.getElementById('auth-pseudo').value.trim().toLowerCase();
   const pass   = document.getElementById('auth-pass').value;
   if (!pseudo||!pass) return setAuthError('Remplis tous les champs.');
   if (pseudo.length<2) return setAuthError('Pseudo trop court (2 car. min).');
   if (pass.length<4)   return setAuthError('Mot de passe trop court (4 car. min).');
+  
   const hash = await sha256(pass+pseudo);
   const userRef = db.collection('users').doc(pseudo);
+  
   try {
     if (isRegister) {
       const snap = await userRef.get();
       if (snap.exists) return setAuthError('Ce pseudo est déjà pris.');
-      await userRef.set({ passwordHash:hash, createdAt:Date.now() });
+      await userRef.set({ 
+        passwordHash: hash, 
+        createdAt: Date.now(),
+        displayName: pseudo,
+        avatarUrl: '',
+        theme: 'dark'
+      });
       toast('Compte créé !','success');
     } else {
       const snap = await userRef.get();
-      if (!snap.exists) return setAuthError('Pseudo introuvable.');
+      if (!snap.exists) return setAuthError('Identifiant introuvable.');
       if (snap.data().passwordHash!==hash) return setAuthError('Mot de passe incorrect.');
     }
     localStorage.setItem('collecto_session', JSON.stringify({uid:pseudo}));
     await startSession(pseudo);
   } catch(e) { setAuthError('Erreur Firebase. Vérifie ta config.'); console.error(e); }
 }
+
 async function startSession(pseudo) {
-  currentUser = {uid:pseudo,pseudo};
+  const snap = await db.collection('users').doc(pseudo).get();
+  const data = snap.data() || {};
+  
+  currentUser = {
+    uid: pseudo,
+    pseudo: pseudo,
+    displayName: data.displayName || pseudo,
+    avatarUrl: data.avatarUrl || '',
+    theme: data.theme || 'dark'
+  };
+  
+  applySettingsToUI();
+  
   document.getElementById('auth-screen').style.display  = 'none';
   document.getElementById('app-screen').style.display   = 'block';
-  document.getElementById('user-name').textContent   = pseudo;
-  document.getElementById('user-avatar').textContent = pseudo[0].toUpperCase();
+  
   await loadUserData();
   render();
 }
+
+function applySettingsToUI() {
+  document.documentElement.setAttribute('data-theme', currentUser.theme);
+  document.getElementById('user-name').textContent = currentUser.displayName;
+  
+  if (currentUser.avatarUrl) {
+    document.getElementById('user-avatar').innerHTML = `<img src="${currentUser.avatarUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+  } else {
+    document.getElementById('user-avatar').textContent = currentUser.displayName[0].toUpperCase();
+  }
+}
+
+function openSettingsModal() {
+  document.getElementById('set-display').value = currentUser.displayName;
+  document.getElementById('set-avatar').value = currentUser.avatarUrl;
+  document.getElementById('set-theme').value = currentUser.theme;
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function closeSettingsModal() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+async function saveSettings() {
+  const newName = document.getElementById('set-display').value.trim() || currentUser.pseudo;
+  const newAvatar = document.getElementById('set-avatar').value.trim();
+  const newTheme = document.getElementById('set-theme').value;
+  
+  await db.collection('users').doc(currentUser.uid).update({
+    displayName: newName,
+    avatarUrl: newAvatar,
+    theme: newTheme
+  });
+  
+  currentUser.displayName = newName;
+  currentUser.avatarUrl = newAvatar;
+  currentUser.theme = newTheme;
+  
+  applySettingsToUI();
+  closeSettingsModal();
+  toast('Paramètres mis à jour ✓', 'success');
+}
+
 function logout() {
   localStorage.removeItem('collecto_session');
   currentUser=null; categories=[]; items=[]; scanItems=[];
   document.getElementById('app-screen').style.display  = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
+  document.documentElement.setAttribute('data-theme', 'dark'); 
   ['auth-pseudo','auth-pass'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('auth-error').textContent = '';
   toast('Déconnecté');
 }
+
 async function init() {
   const saved = localStorage.getItem('collecto_session');
   if (saved) {
@@ -570,6 +688,7 @@ async function saveScanToDb(s) { await db.collection('users').doc(currentUser.ui
 async function deleteScanFromDb(id) { await db.collection('users').doc(currentUser.uid).collection('scans').doc(id).delete(); }
 async function saveCatToDb(cat) { await db.collection('users').doc(currentUser.uid).collection('categories').doc(cat.id).set(cat); }
 async function deleteCatFromDb(id) { await db.collection('users').doc(currentUser.uid).collection('categories').doc(id).delete(); }
+
 async function deleteCat(catId) {
   const cat = categories.find(c=>c.id===catId); if (!cat) return;
   const count = cat.isScan ? scanItems.length : items.filter(i=>i.catId===catId).length;
@@ -588,6 +707,27 @@ async function deleteCat(catId) {
   if (activeCatId===catId) activeCatId = categories[0]?.id || null;
   closeDetail(); render();
   toast(`"${cat.name}" supprimée`, 'success');
+}
+
+async function moveCat(catId, dir) {
+  event.stopPropagation();
+  const idx = categories.findIndex(c => c.id === catId);
+  if (idx < 0) return;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= categories.length) return;
+
+  // Permutation
+  const temp = categories[idx];
+  categories[idx] = categories[newIdx];
+  categories[newIdx] = temp;
+
+  // Mise à jour de l'ordre
+  categories.forEach((c, i) => c.order = i);
+  renderSidebar();
+
+  // Sauvegarde Firebase
+  await saveCatToDb(categories[idx]);
+  await saveCatToDb(categories[newIdx]);
 }
 
 // ══════════════════════════════════════════
@@ -628,11 +768,26 @@ async function searchTMDBMovie(q) {
   if (!TMDB_KEY) return [];
   const r = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&query=${encodeURIComponent(q)}&language=fr-FR`);
   const d = await r.json();
-  return (d.results || []).slice(0,6).filter(x => x.poster_path).map(x => ({
-    title: x.title,
-    cover: `https://image.tmdb.org/t/p/w300${x.poster_path}`,
-    meta: (x.release_date || '').slice(0,4),
-    volumes: 0 // Pas d'épisodes pour un film
+  const results = (d.results || []).slice(0,6).filter(x => x.poster_path);
+  
+  // On enrichit les résultats pour récupérer la durée
+  return await Promise.all(results.map(async (x) => {
+    let runtimeText = '';
+    try {
+      const movieRes = await fetch(`https://api.themoviedb.org/3/movie/${x.id}?api_key=${TMDB_KEY}&language=fr-FR`);
+      const movieData = await movieRes.json();
+      if (movieData.runtime > 0) {
+        runtimeText = ` · ${movieData.runtime} min`;
+      }
+    } catch(e) { console.error("Erreur TMDB Movie:", e); }
+    
+    return {
+      title: x.title,
+      cover: `https://image.tmdb.org/t/p/w300${x.poster_path}`,
+      // On ajoute la durée directement après l'année (ex: "2014 · 169 min")
+      meta: (x.release_date || '').slice(0,4) + runtimeText,
+      volumes: 0 // On laisse à 0 car on n'utilise pas la grille à cocher pour les films
+    };
   }));
 }
 
@@ -678,44 +833,75 @@ function getUnit(api) {
 function renderSidebar() {
   const nav = document.getElementById('sidebar-nav');
   nav.innerHTML = '<div class="nav-label">Catégories</div>';
-  categories.forEach(cat => {
+  categories.forEach((cat, index) => {
     const count = cat.isScan ? scanItems.length : items.filter(i=>i.catId===cat.id).length;
     const wrap = document.createElement('div');
     wrap.className = 'nav-item-wrap';
+    
+    const isFirst = index === 0;
+    const isLast = index === categories.length - 1;
+
     wrap.innerHTML = `
       <button class="nav-item${cat.id===activeCatId?' active':''}" onclick="activeCatId='${cat.id}';activeFilter='all';closeDetail();render()">
         <span class="nav-icon">${cat.icon}</span>
         <span class="nav-lbl">${cat.name}</span>
         <span class="nav-count">${count}</span>
       </button>
-      <button class="nav-edit-btn" onclick="openCatModal('${cat.id}')" title="Modifier la catégorie">✏️</button>
-      <button class="nav-del-btn" onclick="deleteCat('${cat.id}')" title="Supprimer la catégorie">✕</button>`;
+      <div class="nav-actions">
+        ${!isFirst ? `<button class="nav-act-btn" onclick="moveCat('${cat.id}', -1)" title="Monter">▲</button>` : `<div style="width:22px"></div>`}
+        ${!isLast ? `<button class="nav-act-btn" onclick="moveCat('${cat.id}', 1)" title="Descendre">▼</button>` : `<div style="width:22px"></div>`}
+        <button class="nav-act-btn accent" onclick="openCatModal('${cat.id}')" title="Modifier">✏️</button>
+        <button class="nav-act-btn danger" onclick="deleteCat('${cat.id}')" title="Supprimer">✕</button>
+      </div>
+    `;
     nav.appendChild(wrap);
   });
 }
 
+function setSort(val) {
+  activeSort = val;
+  renderMain();
+}
+
 function renderTopbar() {
   const cat = getActiveCat();
+  const sortContainer = document.getElementById('sort-container');
+
   if (!cat) {
     document.getElementById('topbar-title').textContent = 'Ma collection';
     document.getElementById('topbar-sub').textContent = '';
     document.getElementById('filter-tabs').innerHTML = '';
     document.getElementById('main-add-btn').style.display = 'none';
+    sortContainer.style.display = 'none';
     return;
   }
+  
   document.getElementById('main-add-btn').style.display = '';
   document.getElementById('topbar-title').textContent = cat.name;
+
   if (cat.isScan) {
     document.getElementById('topbar-sub').textContent = `${scanItems.length} manga${scanItems.length!==1?'s':''} suivis`;
     document.getElementById('filter-tabs').innerHTML = '';
     document.getElementById('main-add-btn').textContent = '＋ Ajouter';
-    return;
+  } else {
+    const total = items.filter(i=>i.catId===cat.id).length;
+    document.getElementById('topbar-sub').textContent = `${total} item${total!==1?'s':''}`;
+    const filters = [['all','Tous'],['owned','Possédés'],['inprogress','En cours'],['done','Terminés']];
+    document.getElementById('filter-tabs').innerHTML = filters.map(([f,l])=>`<button class="ftab ${activeFilter===f?'active':''}" onclick="setFilter('${f}')">${l}</button>`).join('');
+    document.getElementById('main-add-btn').textContent = '＋ Ajouter';
   }
-  const total = items.filter(i=>i.catId===cat.id).length;
-  document.getElementById('topbar-sub').textContent = `${total} item${total!==1?'s':''}`;
-  const filters = [['all','Tous'],['owned','Possédés'],['inprogress','En cours'],['done','Terminés']];
-  document.getElementById('filter-tabs').innerHTML = filters.map(([f,l])=>`<button class="ftab ${activeFilter===f?'active':''}" onclick="setFilter('${f}')">${l}</button>`).join('');
-  document.getElementById('main-add-btn').textContent = '＋ Ajouter';
+
+  const sortHTML = `
+    <select class="sort-select" onchange="setSort(this.value)">
+      <option value="date_desc" ${activeSort==='date_desc'?'selected':''}>🕒 Ajout récent</option>
+      <option value="alpha_asc" ${activeSort==='alpha_asc'?'selected':''}>🔤 Alphabétique (A-Z)</option>
+      <option value="alpha_desc" ${activeSort==='alpha_desc'?'selected':''}>🔤 Alphabétique (Z-A)</option>
+      <option value="tomes_desc" ${activeSort==='tomes_desc'?'selected':''}>⬇️ Plus grand nombre</option>
+      <option value="tomes_asc" ${activeSort==='tomes_asc'?'selected':''}>⬆️ Plus petit nombre</option>
+    </select>
+  `;
+  sortContainer.innerHTML = sortHTML;
+  sortContainer.style.display = 'block';
 }
 
 function renderStats() {
@@ -748,12 +934,27 @@ function renderMain() {
   }
   const q = (document.getElementById('search-input')?.value||'').toLowerCase();
   const grid = document.getElementById('items-grid');
+  
+  // 1. Filtrer
   let its = items.filter(i=>i.catId===cat.id);
   if (q) its = its.filter(i=>i.title.toLowerCase().includes(q));
   if (activeFilter==='owned')      its = its.filter(i=>i.owned==='owned');
   if (activeFilter==='notowned')   its = its.filter(i=>i.owned!=='owned');
   if (activeFilter==='done')       its = its.filter(i=>i.status===cat.statuses[0]);
   if (activeFilter==='inprogress') its = its.filter(i=>i.status==='En cours');
+
+  // 2. Trier
+  if (activeSort === 'alpha_asc') {
+    its.sort((a,b) => (a.title||'').localeCompare(b.title||''));
+  } else if (activeSort === 'alpha_desc') {
+    its.sort((a,b) => (b.title||'').localeCompare(a.title||''));
+  } else if (activeSort === 'tomes_desc') {
+    its.sort((a,b) => (b.totalTomes||0) - (a.totalTomes||0));
+  } else if (activeSort === 'tomes_asc') {
+    its.sort((a,b) => (a.totalTomes||0) - (b.totalTomes||0));
+  } else {
+    its.sort((a,b) => (b.createdAt||0) - (a.createdAt||0));
+  }
 
   if (!its.length) {
     grid.className='grid';
@@ -791,8 +992,24 @@ function renderScanGrid() {
   const q = (document.getElementById('search-input')?.value||'').toLowerCase();
   const grid = document.getElementById('items-grid');
   document.getElementById('stats-row').innerHTML = '';
+  
+  // 1. Filtrer
   let its = scanItems;
   if (q) its = its.filter(s=>s.title.toLowerCase().includes(q));
+
+  // 2. Trier
+  if (activeSort === 'alpha_asc') {
+    its.sort((a,b) => (a.title||'').localeCompare(b.title||''));
+  } else if (activeSort === 'alpha_desc') {
+    its.sort((a,b) => (b.title||'').localeCompare(a.title||''));
+  } else if (activeSort === 'tomes_desc') {
+    its.sort((a,b) => (b.chapter||0) - (a.chapter||0)); 
+  } else if (activeSort === 'tomes_asc') {
+    its.sort((a,b) => (a.chapter||0) - (b.chapter||0));
+  } else {
+    its.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
+  }
+
   if (!its.length) {
     grid.className='scan-grid';
     grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="eicon">📡</div><h3>Aucun suivi scan</h3><p>Clique sur "＋ Ajouter" pour suivre un manga.</p></div>`;
@@ -847,6 +1064,7 @@ function selectItem(id) {
     const readC  = read.length;
     const pct    = Math.round((ownedC/item.totalTomes)*100);
     const unit   = getUnit(cat.api);
+    const actLabel = (cat.api==='tmdb_tv'||cat.api==='tmdb')?'vus':'lus';
 
     const tomeButtons = Array.from({length:item.totalTomes},(_,i)=>{
       const n=i+1;
@@ -883,8 +1101,15 @@ function selectItem(id) {
           <div class="tome-legend-item"><div class="tome-legend-dot" style="background:linear-gradient(135deg,rgba(52,211,153,.4) 50%,rgba(124,107,250,.4) 50%);border:2px solid #34d399;border-bottom-color:var(--accent2);border-right-color:var(--accent2)"></div>Les deux</div>
           <div class="tome-legend-item"><div class="tome-legend-dot" style="background:var(--surface3);border:2px solid var(--border2)"></div>Aucun</div>
         </div>
+        
+        <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap">
+          <button class="tome-bulk-btn" onclick="bulkTomes('${id}', 'owned')">✓ Tout posséder</button>
+          <button class="tome-bulk-btn" onclick="bulkTomes('${id}', 'read')">👁 Tout ${actLabel}</button>
+          <button class="tome-bulk-btn" onclick="bulkTomes('${id}', 'both')">⭐ Les deux</button>
+          <button class="tome-bulk-btn" onclick="bulkTomes('${id}', 'none')">✕ Vider</button>
+        </div>
+
         <div class="tome-grid">${tomeButtons}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:8px">💡 Clic 1 = Possédé · Clic 2 = ${(cat.api==='tmdb_tv'||cat.api==='tmdb')?'Vu':'Lu'} · Clic 3 = Les deux · Clic 4 = Reset</div>
       </div>`;
   }
 
@@ -925,6 +1150,30 @@ async function toggleTome(itemId, tomeNum) {
 
   item.ownedTomes = owned;
   item.readTomes  = read;
+  await saveItemToDb(item);
+  selectItem(itemId);
+}
+
+// ── BULK TOMES (Actions Rapides) ──
+async function bulkTomes(itemId, action) {
+  const item = items.find(i=>i.id===itemId); if (!item) return;
+  
+  // Créer un tableau contenant tous les numéros [1, 2, 3, ..., totalTomes]
+  const allArr = Array.from({length: item.totalTomes}, (_, i) => i + 1);
+
+  if (action === 'owned') {
+    item.ownedTomes = [...allArr];
+  } else if (action === 'read') {
+    item.readTomes = [...allArr];
+  } else if (action === 'both') {
+    item.ownedTomes = [...allArr];
+    item.readTomes = [...allArr];
+  } else if (action === 'none') {
+    item.ownedTomes = [];
+    item.readTomes = [];
+  }
+
+  item.updatedAt = Date.now();
   await saveItemToDb(item);
   selectItem(itemId);
 }
@@ -1188,10 +1437,28 @@ function pickResult(i) {
   const res = document.getElementById('search-results');
   const r   = res._results?.[i]; if (!r) return;
   const cat = getActiveCat();
+  
   document.getElementById('f-title').value = r.title||'';
-  if (r.cover) { document.getElementById('f-image').value=r.cover; updateCoverPreview(); }
-  if (cat?.hasTomes && r.volumes>0) document.getElementById('f-tomes').value = r.volumes;
-  res.className='search-results'; document.getElementById('f-search').value='';
+  if (r.cover) { 
+    document.getElementById('f-image').value=r.cover; 
+    updateCoverPreview(); 
+  }
+  
+  if (cat?.hasTomes && r.volumes > 0) {
+    document.getElementById('f-tomes').value = r.volumes;
+  }
+  
+  // NOUVEAU : Pré-remplir la progression avec la durée pour les films
+  if (cat?.api === 'tmdb_movie' && r.meta) {
+      // Ex r.meta: "2014 · 169 min" -> On extrait ce qui est après le point
+      const parts = r.meta.split('·');
+      if(parts.length > 1) {
+          document.getElementById('f-progress').value = parts[1].trim();
+      }
+  }
+
+  res.className='search-results'; 
+  document.getElementById('f-search').value='';
 }
 function updateCoverPreview() {
   const url  = document.getElementById('f-image').value;
@@ -1289,6 +1556,7 @@ function toast(msg,type='success') {
 document.getElementById('item-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeItemModal();});
 document.getElementById('cat-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCatModal();});
 document.getElementById('scan-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeScanModal();});
+document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettingsModal();});
 document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.getElementById('auth-screen').style.display!=='none') handleAuth(); });
 
 init();
