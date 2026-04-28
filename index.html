@@ -11,19 +11,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
-  .logo-image-start {
-  width: 250px;
-  height: auto;
-  margin-right: 10px;
-}
-  .logo-image {
-  width: 50px;
-  height: auto;
-  margin-right: 10px;
-}
+  .logo-image-start { width: 250px; height: auto; margin-right: 10px; }
+  .logo-image { width: 50px; height: auto; margin-right: 10px; }
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 
-/* THEME SOMBRE (Défaut) */
 :root, [data-theme="dark"] {
   --bg:#0f0f13; --surface:#18181f; --surface2:#1e1e28; --surface3:#25252f;
   --accent:#7c6bfa; --accent2:#a78bfa; --border:rgba(255,255,255,0.08);
@@ -32,7 +23,6 @@
   --danger:#f87171; --radius:10px; --radius-lg:14px;
 }
 
-/* THEME CLAIR */
 [data-theme="light"] {
   --bg:#f9fafb; --surface:#ffffff; --surface2:#f3f4f6; --surface3:#e5e7eb;
   --accent:#6d28d9; --accent2:#8b5cf6; --border:rgba(0,0,0,0.08);
@@ -76,21 +66,18 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .user-logout.danger-icon:hover{color:var(--danger);}
 .sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto;}
 .nav-label{font-size:10px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;padding:8px 8px 4px;}
-
 .nav-item-wrap{display:flex;align-items:center;gap:3px;margin-bottom:2px;position:relative;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:13.5px;color:var(--muted);transition:all .15s;border:none;background:none;flex:1;text-align:left;}
 .nav-item:hover{background:var(--surface2);color:var(--text);}
 .nav-item.active{background:rgba(124,107,250,.15);color:var(--accent2);}
 .nav-icon{font-size:16px;flex-shrink:0;width:20px;text-align:center;}
 .nav-count{margin-left:auto;font-size:11px;background:var(--surface3);color:var(--muted);padding:1px 7px;border-radius:20px;}
-
 .nav-actions{display:none; align-items:center; gap:2px; flex-shrink:0;}
 .nav-item-wrap:hover .nav-actions{display:flex;}
 .nav-act-btn{width:22px; height:22px; border-radius:4px; border:none; background:none; color:var(--muted2); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; padding:0;}
 .nav-act-btn:hover{background:var(--surface3); color:var(--text);}
 .nav-act-btn.danger:hover{background:rgba(239,68,68,.15); color:var(--danger);}
 .nav-act-btn.accent:hover{background:rgba(124,107,250,.15); color:var(--accent2);}
-
 .sidebar-footer{padding:10px 8px;border-top:1px solid var(--border);}
 .add-cat-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);background:none;border:1px dashed var(--border2);width:100%;transition:all .15s;}
 .add-cat-btn:hover{color:var(--accent2);border-color:var(--accent);}
@@ -112,10 +99,8 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .ftab:hover:not(.active){background:var(--surface2);color:var(--text);}
 .sort-select { background:var(--surface); border:1px solid var(--border); color:var(--muted); border-radius:8px; padding:0 12px; font-size:12px; outline:none; cursor:pointer; transition:all .15s; height: 32px; }
 .sort-select:hover { background:var(--surface2); color:var(--text); }
-
 .add-btn{display:flex;align-items:center;gap:6px;padding:0 16px; height: 32px; border-radius:8px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;transition:all .15s;flex-shrink:0;}
 .add-btn:hover{background:var(--accent2);transform:translateY(-1px);}
-
 .content{flex:1;overflow-y:auto;padding:18px 22px;}
 .stats-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;flex:1;min-width:80px;}
@@ -125,13 +110,13 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 
 /* GRID */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:14px;}
-.item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all .2s;}
+.item-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;}
 .item-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.15);}
 .item-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
 .item-cover{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;background:var(--surface2);}
 .item-cover-ph{width:100%;aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:var(--surface2);font-size:48px;color:var(--muted2);}
-.item-body{padding:10px 11px 12px;}
-.item-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-body{padding:10px 11px 12px; display:flex; flex-direction:column; flex:1; justify-content:space-between;}
+.item-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
 .item-meta{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
 .badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
@@ -142,6 +127,10 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .b-prog{background:rgba(245,158,11,.1);color:var(--warning);}
 .b-not{background:rgba(107,114,128,.1);color:var(--muted);}
 .b-scan{background:rgba(96,165,250,.12);color:#60a5fa;}
+
+/* PROGRESS BAR (dans les cartes item et le panneau detail) */
+.tome-progress-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin:8px 0;}
+.tome-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s;}
 
 /* SCAN GRID */
 .scan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
@@ -158,23 +147,13 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .scan-actions{display:flex;gap:6px;margin-top:10px;align-items:center;}
 .scan-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
 .scan-btn:hover{background:var(--accent);border-color:var(--accent);color:#fff;}
-
-/* NOUVELLE BOITE DE CHAPITRE PLUS LARGE */
 .scan-chap-input{width:80px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:13px;font-weight:600;outline:none;text-align:center;}
 .scan-chap-input:focus{border-color:var(--accent);}
 
 /* MASQUER LES FLÈCHES NATIVES DES BOITES DE NOMBRES */
-.scan-chap-input::-webkit-outer-spin-button,
-.scan-chap-input::-webkit-inner-spin-button,
-.finput[type=number]::-webkit-outer-spin-button,
-.finput[type=number]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.scan-chap-input[type=number],
-.finput[type=number] {
-  -moz-appearance: textfield;
-}
+.scan-chap-input::-webkit-outer-spin-button, .scan-chap-input::-webkit-inner-spin-button,
+.finput[type=number]::-webkit-outer-spin-button, .finput[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.scan-chap-input[type=number], .finput[type=number] { -moz-appearance: textfield; }
 
 /* TOME/EPISODE GRID */
 .tome-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px;}
@@ -186,8 +165,6 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .tome-legend{display:flex;gap:14px;margin-bottom:8px;flex-wrap:wrap;}
 .tome-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
 .tome-legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
-.tome-progress-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin:8px 0;}
-.tome-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s;}
 .tome-stats{display:flex;gap:10px;margin-bottom:12px;}
 .tome-stat{flex:1;background:var(--surface2);border-radius:8px;padding:8px 10px;text-align:center;}
 .tome-stat-val{font-size:17px;font-weight:700;}
@@ -208,7 +185,6 @@ html,body{height:100%;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 .detail-section{margin-bottom:14px;}
 .detail-slabel{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);font-weight:600;margin-bottom:6px;}
 .detail-desc{font-size:13px;color:var(--muted);line-height:1.65;}
-.detail-progress{font-size:15px;color:var(--warning);font-weight:600;}
 .detail-actions{padding:12px 16px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
 .dbtn{flex:1;padding:8px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;text-align:center;border:none;}
 .dbtn-edit{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
@@ -271,16 +247,11 @@ select.finput{appearance:none;cursor:pointer;}
 @media(max-width:700px){
   .sidebar{width:56px;}
   .logo-text,.logo-sub,.nav-item .nav-lbl,.nav-count,.add-cat-btn span:not(:first-child),.user-name{display:none;}
-  
-  /* --- CORRECTIONS D'ALIGNEMENT MOBILE --- */
   .sidebar-logo{padding:12px 4px; justify-content:center;}
-  .logo-image{margin-right:0; width:34px;} /* On centre et rétrécit le logo principal */
-  
-  .user-pill{flex-direction:column; padding:10px 4px; gap:10px;} /* On empile l'avatar et les boutons */
+  .logo-image{margin-right:0; width:34px;} 
+  .user-pill{flex-direction:column; padding:10px 4px; gap:10px;}
   .user-actions{flex-direction:column; align-items:center; gap:8px !important;}
-  .user-logout{padding:6px; font-size:16px;} /* On grossit un peu les boutons pour le tactile */
-  /* --------------------------------------- */
-
+  .user-logout{padding:6px; font-size:16px;} 
   .detail-panel.open{position:fixed;inset:0;width:100%;z-index:50;}
   .search-box{display:none;}
   .topbar{padding:10px 14px;}
@@ -300,7 +271,7 @@ select.finput{appearance:none;cursor:pointer;}
 
 <div id="auth-screen">
   <div class="auth-card">
-    <img src="images/Biblioth_que_d'Ohara_Anime_Infobox.webp" alt="Logo Collecto" class="logo-image-start">
+    <img src="images/Arbre_de_la_Cognition_Manga_Infobox.png" alt="Logo Collecto" class="logo-image-start">
     <div class="auth-title">OHARA</div>
     <div class="auth-sub" id="auth-sub">Connecte-toi pour retrouver<br>tes collections sur tous tes appareils.</div>
     <input class="auth-input" id="auth-pseudo" type="text" placeholder="Identifiant" maxlength="30" autocomplete="username">
@@ -338,19 +309,14 @@ select.finput{appearance:none;cursor:pointer;}
         <div class="topbar-title" id="topbar-title">Ma collection</div>
         <div class="topbar-sub" id="topbar-sub"></div>
       </div>
-      
       <div class="filter-tabs" id="filter-tabs"></div>
-      
       <div class="search-box">
         <span style="color:var(--muted)">⌕</span>
         <input type="text" placeholder="Rechercher…" id="search-input" oninput="renderMain()">
       </div>
-      
       <div id="sort-container" style="display:none;"></div>
-      
       <button class="add-btn" id="main-add-btn" onclick="handleAddBtn()">＋ Ajouter</button>
     </div>
-    
     <div class="content" id="main-content">
       <div class="stats-row" id="stats-row"></div>
       <div id="items-grid"></div>
@@ -398,7 +364,7 @@ select.finput{appearance:none;cursor:pointer;}
       </div>
 
       <div class="frow" id="tomes-row" style="display:none">
-        <label class="flabel" id="f-tomes-lbl">Total</label>
+        <label class="flabel" id="f-tomes-lbl">Total (tomes)</label>
         <input class="finput" id="f-tomes" type="number" min="1" max="9999" placeholder="Ex: 108">
         <div style="font-size:11px;color:var(--muted);margin-top:5px">💡 Rempli automatiquement si trouvé via la recherche</div>
       </div>
@@ -407,6 +373,17 @@ select.finput{appearance:none;cursor:pointer;}
         <label class="flabel">Saisons & Épisodes</label>
         <div id="seasons-container" style="display:flex; flex-direction:column; gap:6px;"></div>
         <button type="button" class="btn-cancel" style="padding:6px 12px; margin-top:8px; font-size:12px;" onclick="addSeasonInput()">+ Ajouter une saison</button>
+      </div>
+
+      <div class="frow2" id="book-progress-row" style="display:none">
+        <div>
+           <label class="flabel">Page actuelle</label>
+           <input class="finput" id="f-book-current" type="number" min="0" placeholder="Ex: 120">
+        </div>
+        <div>
+           <label class="flabel">Total pages</label>
+           <input class="finput" id="f-book-total" type="number" min="1" placeholder="Ex: 350">
+        </div>
       </div>
 
       <div class="frow" id="progress-row"><label class="flabel" id="progress-lbl">Progression</label><input class="finput" id="f-progress" placeholder="Ex: 34h…"></div>
@@ -528,9 +505,6 @@ service cloud.firestore {
 </div>
 
 <script>
-// ══════════════════════════════════════════
-//  ⚙️  CONFIG FIREBASE
-// ══════════════════════════════════════════
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyBvCTNvHnc5PgbKaQ4W1UiRMUM5j9a5KWU",
   projectId: "collecto-55aa4",
@@ -545,7 +519,6 @@ const TMDB_KEY = "b89d21c912d8c2be86bffad768692cd4";
 firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 
-// ── State ──
 let currentUser = null;
 let categories  = [];
 let items       = [];   
@@ -564,9 +537,6 @@ let isRegister  = false;
 const CAT_SCAN_ID = '__scan__';
 const DEFAULT_CATS = [];
 
-// ══════════════════════════════════════════
-//  AUTH & SETTINGS
-// ══════════════════════════════════════════
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -699,9 +669,6 @@ async function init() {
   document.getElementById('auth-screen').style.display='flex';
 }
 
-// ══════════════════════════════════════════
-//  FIRESTORE
-// ══════════════════════════════════════════
 async function loadUserData() {
   document.getElementById('loading').style.display='flex';
   const uid = currentUser.uid;
@@ -771,13 +738,8 @@ async function moveCat(catId, dir) {
   await saveCatToDb(categories[newIdx]);
 }
 
-// ══════════════════════════════════════════
-//  COVER SEARCH & API
-// ══════════════════════════════════════════
 
-// ⚡️ FONCTION POUR RÉCUPÉRER LE DERNIER CHAPITRE (MANGA HOOK API -> MANGADEX)
 async function fetchMaxChapters(title) {
-  // 1. Essai avec Manga Hook API
   try {
     const res = await fetch(`https://mangahook-api.vercel.app/api/search?q=${encodeURIComponent(title)}`);
     const data = await res.json();
@@ -787,8 +749,6 @@ async function fetchMaxChapters(title) {
       if (numMatch) return parseInt(numMatch[0]);
     }
   } catch(e) {}
-  
-  // 2. Fallback direct MangaDex (si MangaHook est KO)
   try {
     const searchRes = await fetch(`https://api.mangadex.org/manga?title=${encodeURIComponent(title)}&limit=1`);
     const searchData = await searchRes.json();
@@ -801,7 +761,6 @@ async function fetchMaxChapters(title) {
       }
     }
   } catch(e) {}
-  
   return 0;
 }
 
@@ -825,7 +784,6 @@ async function searchGame(q) {
 }
 
 async function searchManga(q) {
-  // On utilise uniquement Jikan ici pour éviter l'erreur 429 avec MangaDex
   try {
     const r = await fetch(`https://api.jikan.moe/v4/manga?q=${encodeURIComponent(q)}&limit=6`);
     if (!r.ok) return []; 
@@ -839,16 +797,18 @@ async function searchManga(q) {
         volumes: m.volumes || 0,
         chapters: m.chapters || 0
     }));
-  } catch (e) {
-    console.error("Erreur API Jikan:", e);
-    return [];
-  }
+  } catch (e) { return []; }
 }
 
 async function searchBook(q) {
-  const r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=title,author_name,cover_i`);
+  const r=await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=title,author_name,cover_i,number_of_pages_median`);
   const d=await r.json();
-  return (d.docs||[]).slice(0,6).map(b=>({title:b.title,cover:b.cover_i?`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`:null,meta:b.author_name?.[0]||'',volumes:0}));
+  return (d.docs||[]).slice(0,6).map(b=>({
+      title:b.title,
+      cover:b.cover_i?`https://covers.openlibrary.org/b/id/${b.cover_i}-M.jpg`:null,
+      meta:b.author_name?.[0]||'',
+      volumes: b.number_of_pages_median || 0 
+    }));
 }
 
 async function searchTMDBMovie(q) {
@@ -908,10 +868,6 @@ async function searchTMDBTv(q) {
   }));
 }
 
-
-// ══════════════════════════════════════════
-//  RENDER
-// ══════════════════════════════════════════
 function getActiveCat() { return categories.find(c=>c.id===activeCatId); }
 function isScanMode() { 
   const cat = getActiveCat(); 
@@ -920,7 +876,7 @@ function isScanMode() {
 
 function getUnit(api) {
   if (api === 'tmdb_tv' || api === 'tmdb') return { full: 'Épisode', plural: 'Épisodes', short: 'ep.' };
-  if (api === 'book') return { full: 'Volume', plural: 'Volumes', short: 'vol.' };
+  if (api === 'book') return { full: 'Page', plural: 'Pages', short: 'p.' };
   return { full: 'Tome', plural: 'Tomes', short: 't.' };
 }
 
@@ -1086,6 +1042,10 @@ function renderMain() {
         });
         if (tEps > 0) tomeBadge = `<span class="badge b-scan">${rCount}/${tEps} ep.</span>`;
     } 
+    else if (cat.api === 'book' && item.totalTomes > 0) {
+        const readP = parseInt(item.progress)||0;
+        tomeBadge = `<span class="badge b-scan">${readP}/${item.totalTomes} p.</span>`;
+    }
     else if (cat.hasTomes && item.totalTomes>0) {
       const ownedCount = (item.ownedTomes||[]).length;
       const unit = getUnit(cat.api);
@@ -1099,7 +1059,7 @@ function renderMain() {
       ${cover}
       <div class="item-body">
         <div class="item-title">${esc(item.title)}</div>
-        ${item.progress?`<div class="item-meta">${esc(item.progress)}</div>`:''}
+        ${(item.progress && cat.api!=='book')?`<div class="item-meta">${esc(item.progress)}</div>`:''}
         <div class="item-badges">${ob}${sb}${tomeBadge}</div>
       </div>
     </div>`;
@@ -1112,11 +1072,9 @@ function renderScanGrid() {
   const grid = document.getElementById('items-grid');
   document.getElementById('stats-row').innerHTML = '';
   
-  // 1. Filtrer
   let its = scanItems;
   if (q) its = its.filter(s=>s.title.toLowerCase().includes(q));
 
-  // 2. Trier
   if (activeSort === 'alpha_asc') {
     its.sort((a,b) => (a.title||'').localeCompare(b.title||''));
   } else if (activeSort === 'alpha_desc') {
@@ -1239,6 +1197,27 @@ function selectItem(id) {
       </div>`;
       
   } 
+  else if (cat.api === 'book') {
+      const readP = parseInt(item.progress)||0;
+      const totalP = parseInt(item.totalTomes)||0;
+      const pct = totalP > 0 ? Math.min(100, Math.round((readP/totalP)*100)) : 0;
+      
+      tomesHTML = `
+      <div class="detail-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div class="detail-slabel" style="margin-bottom:0">Progression de lecture</div>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px">
+          <input type="number" min="0" value="${readP}" style="width:70px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:16px;font-weight:700;outline:none;text-align:center"
+            onchange="updateBookProgress('${id}', this.value)" onclick="this.select()">
+          <span style="font-size:14px;color:var(--muted)">/ </span>
+          <input type="number" min="1" value="${totalP}" style="width:60px;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--muted);font-size:13px;outline:none;text-align:center"
+            onchange="updateTotalTomes('${id}', this.value)" onclick="this.select()">
+          <span style="font-size:13px;color:var(--muted)">pages</span>
+        </div>
+        ${totalP>0 ? `<div class="tome-progress-bar" style="margin-top:12px"><div class="tome-progress-fill" style="width:${pct}%"></div></div><div style="font-size:11px;color:var(--muted);margin-top:4px">${pct}% lu</div>` : ''}
+      </div>`;
+  }
   else if (cat.hasTomes && item.totalTomes>0) {
     const owned  = item.ownedTomes||[];
     const read   = item.readTomes||[];
@@ -1299,7 +1278,7 @@ function selectItem(id) {
     <div class="detail-title">${esc(item.title)}</div>
     <div class="detail-cat">${cat.icon} ${cat.name}</div>
     <div class="detail-section" style="${ob===''&&!sb?'display:none;':''}"><div class="detail-slabel">Statut</div><div style="display:flex;gap:6px;flex-wrap:wrap">${ob}${sb}</div></div>
-    ${item.progress?`<div class="detail-section"><div class="detail-slabel">${esc(cat.progressLabel)}</div><div class="detail-progress">${esc(item.progress)}</div></div>`:''}
+    ${(item.progress && cat.api!=='book')?`<div class="detail-section"><div class="detail-slabel">${esc(cat.progressLabel)}</div><div class="detail-progress">${esc(item.progress)}</div></div>`:''}
     ${tomesHTML}
     ${item.desc?`<div class="detail-section"><div class="detail-slabel">Description</div><div class="detail-desc">${esc(item.desc)}</div></div>`:''}
   `;
@@ -1308,6 +1287,14 @@ function selectItem(id) {
     <button class="dbtn dbtn-del" onclick="deleteItem('${item.id}')">🗑 Supprimer</button>
   `;
   renderMain();
+}
+
+async function updateBookProgress(itemId, val) {
+    const item = items.find(i=>i.id===itemId); if (!item) return;
+    item.progress = Math.max(0, parseInt(val)||0).toString();
+    item.updatedAt = Date.now();
+    await saveItemToDb(item);
+    selectItem(itemId);
 }
 
 async function toggleEpisode(itemId, seasonNum, epNum) {
@@ -1493,9 +1480,10 @@ function openItemModal(editId) {
   document.getElementById('f-status').innerHTML = cat.statuses.map(s=>`<option value="${s}">${s}</option>`).join('');
   
   document.getElementById('owned-wrapper').style.display = cat.api === 'tmdb_tv' ? 'none' : 'block';
-  document.getElementById('tomes-row').style.display  = (cat.hasTomes && cat.api !== 'tmdb_tv') ? 'block' : 'none';
+  document.getElementById('tomes-row').style.display  = (cat.hasTomes && cat.api !== 'tmdb_tv' && cat.api !== 'book') ? 'block' : 'none';
   document.getElementById('seasons-row').style.display = cat.api === 'tmdb_tv' ? 'block' : 'none';
-  document.getElementById('progress-row').style.display = cat.hasTomes ? 'none' : 'block';
+  document.getElementById('progress-row').style.display = (cat.hasTomes || cat.api === 'book') ? 'none' : 'block';
+  document.getElementById('book-progress-row').style.display = cat.api === 'book' ? 'grid' : 'none';
   
   document.getElementById('seasons-container').innerHTML = '';
 
@@ -1510,6 +1498,12 @@ function openItemModal(editId) {
       document.getElementById('f-tomes').value    = item.totalTomes||'';
       document.getElementById('f-image').value    = item.image||'';
       document.getElementById('f-desc').value     = item.desc||'';
+      
+      if (cat.api === 'book') {
+          document.getElementById('f-book-current').value = item.progress||'0';
+          document.getElementById('f-book-total').value = item.totalTomes||'';
+      }
+
       updateCoverPreview();
       
       if (cat.api === 'tmdb_tv' && item.seasons) {
@@ -1517,7 +1511,7 @@ function openItemModal(editId) {
       }
     }
   } else {
-    ['f-search','f-title','f-progress','f-image','f-desc','f-tomes'].forEach(id=>document.getElementById(id).value='');
+    ['f-search','f-title','f-progress','f-image','f-desc','f-tomes','f-book-current','f-book-total'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('f-owned').value='owned';
     document.getElementById('cover-prev').innerHTML='<span style="color:var(--muted2);font-size:12px">Aperçu</span>';
   }
@@ -1536,6 +1530,7 @@ async function saveItem() {
   
   const existing = editingItemId ? items.find(i=>i.id===editingItemId) : null;
   let totalTomes = parseInt(document.getElementById('f-tomes').value)||0;
+  let progressStr = document.getElementById('f-progress').value.trim();
   let seasons = existing?.seasons || [];
   let readEpisodes = existing?.readEpisodes || {};
   
@@ -1548,6 +1543,9 @@ async function saveItem() {
           if(s > 0 && epCount > 0) seasons.push({s, epCount});
       });
       totalTomes = seasons.reduce((acc, curr) => acc + curr.epCount, 0); 
+  } else if (cat.api === 'book') {
+      totalTomes = parseInt(document.getElementById('f-book-total').value)||0;
+      progressStr = document.getElementById('f-book-current').value.trim();
   }
 
   const item = {
@@ -1555,7 +1553,7 @@ async function saveItem() {
     catId: activeCatId, title,
     owned:    document.getElementById('f-owned').value,
     status:   document.getElementById('f-status').value,
-    progress: document.getElementById('f-progress').value.trim(),
+    progress: progressStr,
     image:    document.getElementById('f-image').value.trim(),
     desc:     document.getElementById('f-desc').value.trim(),
     totalTomes,
@@ -1659,7 +1657,6 @@ function onScanSearchInput() {
   },500);
 }
 
-// ⚡️ NOUVEAU: Fetch asynchrone SEULEMENT AU CLIC
 function pickScanResult(i) {
   const res = document.getElementById('scan-search-results');
   const r   = res._results?.[i]; if (!r) return;
@@ -1704,7 +1701,6 @@ function onSearchInput() {
     res._results = results;
   },500);
 }
-
 function pickResult(i) {
   const res = document.getElementById('search-results');
   const r   = res._results?.[i]; if (!r) return;
@@ -1716,8 +1712,13 @@ function pickResult(i) {
     updateCoverPreview(); 
   }
   
-  if (cat?.hasTomes && r.volumes > 0) {
+  if (cat?.hasTomes && r.volumes > 0 && cat?.api !== 'book') {
     document.getElementById('f-tomes').value = r.volumes;
+  }
+  
+  if (cat?.api === 'book' && r.volumes > 0) {
+      document.getElementById('f-book-total').value = r.volumes;
+      document.getElementById('f-book-current').value = 0;
   }
   
   if (cat?.api === 'tmdb_movie' && r.meta) {
