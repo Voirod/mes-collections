@@ -244,6 +244,39 @@ select.finput{appearance:none;cursor:pointer;}
 .toast.success{border-left:3px solid var(--success);}
 .toast.error{border-left:3px solid var(--danger);}
 
+
+/* HOME PAGE */
+.home-section { margin-bottom: 28px; }
+.home-section-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.home-section-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); }
+.home-section-count { font-size:11px; color:var(--muted2); }
+.home-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; }
+.home-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden; cursor:pointer; transition:all .2s; display:flex; flex-direction:column; position:relative; }
+.home-item:hover { border-color:var(--border2); transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.2); }
+.home-item-cover { width:100%; aspect-ratio:2/3; object-fit:cover; display:block; background:var(--surface2); }
+.home-item-cover-ph { width:100%; aspect-ratio:2/3; display:flex; align-items:center; justify-content:center; background:var(--surface2); font-size:36px; color:var(--muted2); }
+.home-item-body { padding:8px 10px 10px; flex:1; }
+.home-item-title { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px; }
+.home-item-cat { font-size:10px; color:var(--muted); margin-bottom:5px; }
+.home-item-badge { font-size:10px; padding:2px 6px; border-radius:20px; font-weight:500; display:inline-block; }
+.home-item-ago { font-size:10px; color:var(--muted2); margin-top:4px; }
+.home-scan-row { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); display:flex; align-items:center; gap:12px; padding:10px 14px; cursor:pointer; transition:all .2s; }
+.home-scan-row:hover { border-color:var(--border2); transform:translateY(-1px); box-shadow:0 4px 14px rgba(0,0,0,.15); }
+.home-scan-cover { width:44px; height:62px; object-fit:cover; border-radius:6px; flex-shrink:0; background:var(--surface2); }
+.home-scan-cover-ph { width:44px; height:62px; border-radius:6px; flex-shrink:0; background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:20px; }
+.home-scan-info { flex:1; min-width:0; }
+.home-scan-title { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.home-scan-chap { font-size:20px; font-weight:800; color:var(--accent2); line-height:1.1; }
+.home-scan-sub { font-size:10px; color:var(--muted); margin-top:2px; }
+.home-scan-actions { display:flex; gap:4px; flex-shrink:0; }
+.home-empty { text-align:center; padding:40px 20px; color:var(--muted); }
+.home-empty .eicon { font-size:40px; margin-bottom:10px; }
+.home-empty h3 { font-size:14px; color:var(--text); margin-bottom:6px; }
+.home-welcome { background:linear-gradient(135deg,rgba(124,107,250,.15),rgba(167,139,250,.08)); border:1px solid rgba(124,107,250,.25); border-radius:var(--radius-lg); padding:20px 24px; margin-bottom:24px; display:flex; align-items:center; gap:16px; }
+.home-welcome-icon { font-size:36px; flex-shrink:0; }
+.home-welcome-text h2 { font-size:16px; font-weight:700; margin-bottom:4px; }
+.home-welcome-text p { font-size:12px; color:var(--muted); line-height:1.5; }
+
 @media(max-width:700px){
   .sidebar{width:56px;}
   .logo-text,.logo-sub,.nav-item .nav-lbl,.nav-count,.add-cat-btn span:not(:first-child),.user-name{display:none;}
@@ -296,6 +329,12 @@ select.finput{appearance:none;cursor:pointer;}
         <div class="user-logout" onclick="openSettingsModal()" title="Paramètres">⚙️</div>
         <div class="user-logout danger-icon" onclick="logout()" title="Se déconnecter">↪</div>
       </div>
+    </div>
+    <div style="padding:8px 8px 0">
+      <button class="nav-item" id="home-nav-btn" onclick="activeCatId=null;activeFilter='all';closeDetail();render()" style="width:100%;margin-bottom:2px">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-lbl">Accueil</span>
+      </button>
     </div>
     <nav class="sidebar-nav" id="sidebar-nav"><div class="nav-label">Catégories</div></nav>
     <div class="sidebar-footer">
@@ -468,6 +507,14 @@ select.finput{appearance:none;cursor:pointer;}
     <div class="modal-body">
       <div class="frow"><label class="flabel">Pseudo affiché</label><input class="finput" id="set-display" placeholder="Ex: Grand Collectionneur"></div>
       <div class="frow"><label class="flabel">URL de l'avatar (optionnel)</label><input class="finput" id="set-avatar" placeholder="https://..."></div>
+      <div class="frow"><label class="flabel">Nombre d'items sur la page d'accueil</label>
+        <select class="finput" id="set-home-count">
+          <option value="6">6 items</option>
+          <option value="12">12 items</option>
+          <option value="20">20 items</option>
+          <option value="0">Tout afficher</option>
+        </select>
+      </div>
       <div class="frow"><label class="flabel">Apparence de l'application</label>
         <select class="finput" id="set-theme">
           <option value="dark">🌙 Thème Sombre</option>
@@ -533,6 +580,7 @@ let selectedItemId = null;
 let searchTimer = null;
 let scanSearchTimer = null;
 let isRegister  = false;
+let homeItemCount = 12; // nb items page accueil
 
 const CAT_SCAN_ID = '__scan__';
 const DEFAULT_CATS = [];
@@ -591,8 +639,10 @@ async function startSession(pseudo) {
     pseudo: pseudo,
     displayName: data.displayName || pseudo,
     avatarUrl: data.avatarUrl || '',
-    theme: data.theme || 'dark'
+    theme: data.theme || 'dark',
+    homeCount: data.homeCount || 12
   };
+  homeItemCount = currentUser.homeCount;
   
   applySettingsToUI();
   
@@ -618,6 +668,7 @@ function openSettingsModal() {
   document.getElementById('set-display').value = currentUser.displayName;
   document.getElementById('set-avatar').value = currentUser.avatarUrl;
   document.getElementById('set-theme').value = currentUser.theme;
+  document.getElementById('set-home-count').value = currentUser.homeCount || 12;
   document.getElementById('settings-modal').classList.add('open');
 }
 
@@ -629,16 +680,20 @@ async function saveSettings() {
   const newName = document.getElementById('set-display').value.trim() || currentUser.pseudo;
   const newAvatar = document.getElementById('set-avatar').value.trim();
   const newTheme = document.getElementById('set-theme').value;
+  const newHomeCount = parseInt(document.getElementById('set-home-count').value)||12;
   
   await db.collection('users').doc(currentUser.uid).update({
     displayName: newName,
     avatarUrl: newAvatar,
-    theme: newTheme
+    theme: newTheme,
+    homeCount: newHomeCount
   });
   
   currentUser.displayName = newName;
   currentUser.avatarUrl = newAvatar;
   currentUser.theme = newTheme;
+  currentUser.homeCount = newHomeCount;
+  homeItemCount = newHomeCount;
   
   applySettingsToUI();
   closeSettingsModal();
@@ -685,7 +740,7 @@ async function loadUserData() {
     scanItems = scanSnap.docs.map(d=>({id:d.id,...d.data()}));
     scanItems.sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
 
-    activeCatId = categories[0]?.id || null;
+    activeCatId = null; // démarre sur l'accueil
   } catch(e) {
     console.error('Erreur chargement:', e);
     document.getElementById('firestore-helper').style.display='flex';
@@ -881,6 +936,8 @@ function getUnit(api) {
 }
 
 function renderSidebar() {
+  const homeBtn = document.getElementById('home-nav-btn');
+  if (homeBtn) homeBtn.className = 'nav-item' + (activeCatId===null?' active':'');
   const nav = document.getElementById('sidebar-nav');
   nav.innerHTML = '<div class="nav-label">Catégories</div>';
   categories.forEach((cat, index) => {
@@ -918,8 +975,9 @@ function renderTopbar() {
   const sortContainer = document.getElementById('sort-container');
 
   if (!cat) {
-    document.getElementById('topbar-title').textContent = 'Ma collection';
-    document.getElementById('topbar-sub').textContent = '';
+    const totalAll = items.length + scanItems.length;
+    document.getElementById('topbar-title').textContent = 'Accueil';
+    document.getElementById('topbar-sub').textContent = `${totalAll} item${totalAll!==1?'s':''} au total`;
     document.getElementById('filter-tabs').innerHTML = '';
     document.getElementById('main-add-btn').style.display = 'none';
     sortContainer.style.display = 'none';
@@ -980,20 +1038,154 @@ function renderStats() {
   document.getElementById('stats-row').innerHTML = statsHTML;
 }
 
-function renderMain() {
-  if (isScanMode()) { renderScanGrid(); return; }
-  const cat = getActiveCat();
-  if (!cat) {
-    document.getElementById('stats-row').innerHTML='';
-    document.getElementById('items-grid').innerHTML=`
-      <div class="empty" style="grid-column:1/-1;padding:80px 20px">
-        <div class="eicon">📦</div>
-        <h3>Bienvenue sur Collecto !</h3>
-        <p style="margin-top:8px">Crée ta première catégorie avec le bouton ci-dessous.</p>
-        <button onclick="openCatModal()" style="margin-top:18px;padding:10px 22px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer">＋ Créer une catégorie</button>
+
+function timeAgo(ts) {
+  if (!ts) return '';
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff/60000);
+  const h = Math.floor(diff/3600000);
+  const d = Math.floor(diff/86400000);
+  if (m < 1) return 'à l\'instant';
+  if (m < 60) return `il y a ${m} min`;
+  if (h < 24) return `il y a ${h}h`;
+  if (d < 7) return `il y a ${d}j`;
+  return new Date(ts).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+}
+
+function renderHomePage() {
+  document.getElementById('stats-row').innerHTML = '';
+  const grid = document.getElementById('items-grid');
+
+  // Tous les items normaux triés par updatedAt ou createdAt
+  let allItems = items.map(i => {
+    const cat = categories.find(c=>c.id===i.catId);
+    return {...i, _cat: cat, _ts: i.updatedAt||i.createdAt||0, _type:'item'};
+  });
+
+  // Scans triés par updatedAt
+  let allScans = scanItems.map(s => ({
+    ...s, _cat: null, _ts: s.updatedAt||s.createdAt||0, _type:'scan'
+  }));
+
+  // Merge et tri par date décroissante
+  let all = [...allItems, ...allScans].sort((a,b)=>b._ts - a._ts);
+
+  // Appliquer la limite
+  const limit = homeItemCount > 0 ? homeItemCount : all.length;
+  all = all.slice(0, limit);
+
+  if (!all.length) {
+    grid.innerHTML = `
+      <div class="home-empty" style="grid-column:1/-1">
+        <div class="eicon">🏠</div>
+        <h3>Bienvenue !</h3>
+        <p>Tes items récemment modifiés apparaîtront ici.</p>
+        <button onclick="openCatModal()" style="margin-top:16px;padding:10px 22px;border-radius:8px;background:var(--accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer">＋ Créer une catégorie</button>
       </div>`;
     return;
   }
+
+  // Séparer items normaux "en cours" et scans
+  const inProgress = all.filter(x => x._type==='item' && x.status==='En cours');
+  const scansActive = all.filter(x => x._type==='scan');
+  const rest = all.filter(x => !(x._type==='item' && x.status==='En cours') && x._type!=='scan');
+
+  let html = '';
+
+  // Section : En cours (items)
+  if (inProgress.length) {
+    html += `<div class="home-section">
+      <div class="home-section-hdr">
+        <div class="home-section-title">▶ En cours</div>
+        <div class="home-section-count">${inProgress.length} item${inProgress.length>1?'s':''}</div>
+      </div>
+      <div class="home-grid">`;
+    inProgress.forEach(item => {
+      const cat = item._cat;
+      const cover = item.image
+        ? `<img class="home-item-cover" src="${item.image}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="home-item-cover-ph" style="display:none">${cat?.icon||'📦'}</div>`
+        : `<div class="home-item-cover-ph">${cat?.icon||'📦'}</div>`;
+      html += `<div class="home-item" onclick="activeCatId='${item.catId}';closeDetail();render();setTimeout(()=>selectItem('${item.id}'),50)">
+        ${cover}
+        <div class="home-item-body">
+          <div class="home-item-title">${esc(item.title)}</div>
+          <div class="home-item-cat">${cat?.icon||''} ${cat?.name||''}</div>
+          ${item.progress?`<div class="home-item-badge b-prog" style="background:rgba(251,191,36,.1);color:var(--warning)">${esc(item.progress)}</div>`:''}
+          <div class="home-item-ago">${timeAgo(item._ts)}</div>
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+
+  // Section : Suivi scans
+  if (scansActive.length) {
+    const cat = categories.find(c=>c.isScan);
+    const scanCatId = cat?.id || null;
+    html += `<div class="home-section">
+      <div class="home-section-hdr">
+        <div class="home-section-title">📡 Suivi scans</div>
+        <div class="home-section-count">${scansActive.length} manga${scansActive.length>1?'s':''}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">`;
+    scansActive.forEach(s => {
+      const pct = s.totalChapters>0 ? Math.min(100,Math.round((s.chapter/s.totalChapters)*100)) : 0;
+      const coverHTML = s.image
+        ? `<img class="home-scan-cover" src="${s.image}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="home-scan-cover-ph" style="display:none">📡</div>`
+        : `<div class="home-scan-cover-ph">📡</div>`;
+      html += `<div class="home-scan-row" onclick="${scanCatId?`activeCatId='${scanCatId}';closeDetail();render();setTimeout(()=>selectScan('${s.id}'),50)`:''}">
+        ${coverHTML}
+        <div class="home-scan-info">
+          <div class="home-scan-title">${esc(s.title)}</div>
+          <div class="home-scan-chap">${s.chapter||0}</div>
+          <div class="home-scan-sub">chapitre actuel${s.totalChapters>0?' · '+pct+'%':''} · ${timeAgo(s._ts)}</div>
+          ${s.totalChapters>0?`<div class="tome-progress-bar" style="margin:6px 0 0"><div class="tome-progress-fill" style="width:${pct}%"></div></div>`:''}
+        </div>
+        <div class="home-scan-actions" onclick="event.stopPropagation()">
+          <button class="scan-btn" style="width:32px;height:32px" onclick="updateScanChapter('${s.id}',-1)">−</button>
+          <button class="scan-btn" style="width:32px;height:32px" onclick="updateScanChapter('${s.id}',1)">+</button>
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+
+  // Section : Récemment modifiés
+  if (rest.length) {
+    html += `<div class="home-section">
+      <div class="home-section-hdr">
+        <div class="home-section-title">🕒 Récemment modifiés</div>
+        <div class="home-section-count">${rest.length} item${rest.length>1?'s':''}</div>
+      </div>
+      <div class="home-grid">`;
+    rest.forEach(item => {
+      const cat = item._cat;
+      const ob = item.owned==='owned'?'b-owned':item.owned==='wishlist'?'b-wish':'b-notowned';
+      const obLabel = item.owned==='owned'?'Possédé':item.owned==='wishlist'?'Souhait':'Non possédé';
+      const cover = item.image
+        ? `<img class="home-item-cover" src="${item.image}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt=""><div class="home-item-cover-ph" style="display:none">${cat?.icon||'📦'}</div>`
+        : `<div class="home-item-cover-ph">${cat?.icon||'📦'}</div>`;
+      html += `<div class="home-item" onclick="activeCatId='${item.catId}';closeDetail();render();setTimeout(()=>selectItem('${item.id}'),50)">
+        ${cover}
+        <div class="home-item-body">
+          <div class="home-item-title">${esc(item.title)}</div>
+          <div class="home-item-cat">${cat?.icon||''} ${cat?.name||''}</div>
+          ${cat?.api!=='tmdb_tv'?`<div class="home-item-badge ${ob}">${obLabel}</div>`:''}
+          <div class="home-item-ago">${timeAgo(item._ts)}</div>
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
+
+  grid.className = '';
+  grid.innerHTML = html;
+}
+
+function renderMain() {
+  if (isScanMode()) { renderScanGrid(); return; }
+  const cat = getActiveCat();
+  if (!cat) { renderHomePage(); return; }
   const q = (document.getElementById('search-input')?.value||'').toLowerCase();
   const grid = document.getElementById('items-grid');
   
